@@ -371,7 +371,10 @@
       <span style="margin-left: 16px; margin-right: 4px; font-weight: 600;">HOUR</span>
       <button class="btn btn-green" onclick="addHourColumn()">+</button>
       <button class="btn btn-red" onclick="removeHourColumn()" id="removeHourBtn">−</button>
-      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-left: 5%;">
+          <span style="font-weight: 600; font-size: 20px; color: #d3d3d3;">|</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 2px; cursor: pointer;">
           <input type="checkbox" id="showOffset" onchange="onShowOffsetChange()" checked style="cursor: pointer; width: 16px; height: 16px;">
           <span style="font-weight: 600; color: #555;">Show Offset/Actions</span>
       </label>
@@ -402,7 +405,10 @@
   </div>
 <!--  CALCULATOR-->
   <div class="calculator-container">
-    <h2>Counts</h2>
+    
+    <div style="padding: 10px 0px 10px 10px;">
+        <h2 style="display: inline-block; text-align: left; padding-right:91px;">Counts Calculator</h2><button style="text-align:right;" class="btn-clear" onclick="clearCalculator()">AC</button>
+    </div>
     <table class="calculator-table">
       <tbody>
         <tr>
@@ -429,6 +435,7 @@
           <td class="de-label">Total:</td>
           <td><input type="text" class="count-input" id="de_total" value="0" readonly style="background: #f5ffa5; cursor: default;"></td>
         </tr>
+        
       </tbody>
     </table>
   </div>
@@ -1168,7 +1175,12 @@
       // Update total field
       document.getElementById('de_total').value = fmt(total);
     }
-
+      
+    function clearCalculator() {
+      const ids = ['mac_count', 'mea_count', 'mei_count', 'mep_count', 'mpg_count', 'de_total'];
+      ids.forEach(id => document.getElementById(id).value = '');
+      calculateDETotal();
+    }
     // Initialize total on page load
     window.addEventListener('DOMContentLoaded', calculateDETotal);
   </script>
