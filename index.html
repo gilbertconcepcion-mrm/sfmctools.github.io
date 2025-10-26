@@ -20,6 +20,7 @@
       margin: 0 auto; 
       padding: 0 20px;
       box-sizing: border-box;
+      max-width: 1920px;
     }
     
     h1 { 
@@ -273,7 +274,23 @@
 
     .save-container {
       margin-top: 0px;
+      margin-left: 20px;
       text-align: right;
+    }
+      
+    .btn-clear {
+      padding: 8px;
+      text-align: right;
+      cursor: pointer;
+      border-radius: 5px;
+      border: 1px solid #cecece;
+      background-color: #f9f9f9;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .btn-clear:hover {
+      background-color: #e0e0e0;
+      transform: scale(1.05);
     }
   </style>
 <!--CALCULATOR STYLES-->
@@ -317,7 +334,7 @@
     .calculator-table .count-input {
       width: 120px;
       padding: 0.3em 0.5em;
-      border: 1px solid #ddd;
+      border: 1px solid #dddddd;
       border-radius: 3px;
       text-align: right;
       font-family: inherit;
@@ -336,7 +353,7 @@
     <div class="meta">
       <div class="pill">
         Start Date: 
-        <input type="date" value="2025-08-21" id="startDate">
+        <input type="date" value="2025-08-21" id="startDate" onchange="updateTimeHeaders()">
       </div>
       <div class="pill">
         Start Time: 
@@ -350,7 +367,7 @@
         <thead>
           <tr id="timeRow" class="time-row"></tr>
           <tr id="headerRow">
-            <th class="campaign-name">Campaign Name</th>
+            <th class="campaign-name">Campaign</th>
             <th class="small-col">Audience Size</th>
           </tr>
         </thead>
@@ -379,15 +396,9 @@
           <span style="font-weight: 600; color: #555;">Show Offset/Actions</span>
       </label>
       <div class="save-container">
-          <button class="btn btn-blue" onclick="saveTableAsCSV()">💾 Save</button>
+          <button class="btn btn-blue" onclick="saveTableAsCSV()">🔎 PREVIEW</button>
       </div>
       <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
-<!--
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-          <input type="checkbox" id="viewAsPreview" onchange="onViewAsPreviewChange()" style="cursor: pointer; width: 16px; height: 16px;">
-          <span style="font-weight: 600; color: #555;">View as Preview</span>
-        </label>
--->
 
         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
           <input type="checkbox" id="autoRecalculate" onchange="onAutoRecalculateChange()" checked style="cursor: pointer; width: 16px; height: 16px; display: none; visibility: hidden;">
@@ -398,7 +409,7 @@
     </div>
 
     <p style="margin-top:12px;color:#555;font-size:13px">
-      <strong>Distribution:</strong> Set the first active hour value (based on offset)to populate all active hours. Last hour gets the remainder.
+      <strong>Distribution:</strong> Set the first active hour value (based on offset), then click "Recalculate" to copy it to all active hours. Last hour gets the remainder.
     </p>
 
 
@@ -407,7 +418,7 @@
   <div class="calculator-container">
     
     <div style="padding: 10px 0px 10px 10px;">
-        <h2 style="display: inline-block; text-align: left; padding-right:91px;">Counts Calculator</h2><button style="text-align:right;" class="btn-clear" onclick="clearCalculator()">AC</button>
+        <h2 style="display: inline-block; text-align: left; padding-right:89px;">Counts Calculator</h2><button class="btn-clear" style="padding: 8px; text-align:right; cursor: pointer; border-radius: 5px; border: 1px solid #cecece; cursor: pointer;" class="btn-clear" onclick="clearCalculator()">AC</button>
     </div>
     <table class="calculator-table">
       <tbody>
@@ -429,11 +440,11 @@
         </tr>
         <tr>
           <td class="de-label">MPG:</td>
-          <td><input type="text" class="count-input" id="mpg_count" value="0" oninput="calculateDETotal()"></td>
+          <td><input type="text" class="count-input" id="mpg_count" value="0" oninput="calculateDETotal()" style=""></td>
         </tr>
         <tr class="total-row">
           <td class="de-label">Total:</td>
-          <td><input type="text" class="count-input" id="de_total" value="0" readonly style="background: #f5ffa5; cursor: default;"></td>
+          <td><input type="text" class="count-input" id="de_total" value="0" readonly style="cursor: default;"></td>
         </tr>
         
       </tbody>
@@ -556,6 +567,8 @@
         const thActions = document.createElement('th');
         thActions.className = 'action-col';
         timeRow.appendChild(thActions);
+        
+        onShowOffsetChange();
     }
 
     function onHourValueChange(campaignId, hourIndex) {
@@ -1009,7 +1022,7 @@
     function addCampaignRow() {
         campaigns.push({ 
             id: nextCampaignId++, 
-            name: `Campaign ${campaigns.length + 1}`, 
+            name: `Email_${campaigns.length + 1}`, 
             audience: 0,
             hourValues: new Array(hourCount).fill(0),
             offset: 1
@@ -1062,71 +1075,202 @@
         document.getElementById('startDate').value = today;
     }
 
-    function saveTableAsCSV() {
-        const headerRow = document.getElementById('headerRow');
-        let headerTexts = Array.from(headerRow.querySelectorAll('th')).map(th => th.innerText.trim());
-
-        if (headerTexts.length && headerTexts[headerTexts.length - 1].toLowerCase() === 'actions') {
-            headerTexts.pop();
-        }
-
-        const rows = [];
-
-        const hour1TotalEl = document.getElementById('hour_total_1');
-        const hour1Value = hour1TotalEl ? hour1TotalEl.textContent.trim() : '0';
-
-        rows.push([]);
-        rows.push(headerTexts);
-
-        campaigns.forEach(campaign => {
-            const id = campaign.id;
-            const nameInput = document.getElementById(`name_${id}`);
-            const audienceInput = document.getElementById(`audience_${id}`);
-            const offsetInput = document.getElementById(`offset_${id}`);
-
-            const name = nameInput ? nameInput.value.trim() : (campaign.name || '');
-            const audienceRaw = audienceInput ? audienceInput.value.replace(/,/g, '').trim() : String(parseNum(campaign.audience));
-            const offsetValue = offsetInput ? offsetInput.value.trim() : '1';
-
-            const hourCells = [];
-            for (let i = 0; i < hourCount; i++) {
-                const hourInput = document.getElementById(`hour_${id}_${i}`);
-                const hourValue = hourInput ? hourInput.value.replace(/,/g, '').trim() : '0';
-                hourCells.push(hourValue);
-            }
-
-            const totalCell = document.getElementById(`total_${id}`);
-            const totalRaw = totalCell ? totalCell.textContent.replace(/,/g, '').trim() : audienceRaw;
-
-            const row = [name, audienceRaw, offsetValue, ...hourCells, totalRaw];
-            rows.push(row);
-        });
-
-        const footerRow = document.getElementById('footerRow');
-        if (footerRow) {
-            const footerCells = Array.from(footerRow.children)
-                .slice(0, Math.max(footerRow.children.length - 1, 0))
-                .map(td => td.innerText.replace(/,/g, '').trim());
-            if (footerCells.some(c => c !== '' && c.toLowerCase() !== 'totals')) {
-                rows.push(footerCells);
-            }
+function saveTableAsCSV() {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000000; display: flex; align-items: center; justify-content: center; z-index: 10000;';
+    
+    // Create close button (at top right of page)
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '✕';
+    closeBtn.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f44336; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10001;';
+    closeBtn.onclick = () => document.body.removeChild(overlay);
+    closeBtn.onmouseover = () => closeBtn.style.background = '#da190b';
+    closeBtn.onmouseout = () => closeBtn.style.background = '#f44336';
+    
+    // Create content container
+    const container = document.createElement('div');
+    container.style.cssText = 'background: white; padding: 20px; border-radius: 8px; max-width: 95%; max-height: 95%; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);';
+    
+    // Create title
+    const title = document.createElement('h2');
+    title.textContent = 'Counts and Throttle Plan';
+    title.style.cssText = 'margin: 0 0 10px 0; text-align: center; font-size: 18px; color: #333;';
+    
+    // Create date/time info
+    const startDateInput = document.getElementById('startDate');
+    const startTimeSelect = document.getElementById('startTimeSelect');
+    const dateTimeInfo = document.createElement('div');
+    dateTimeInfo.style.cssText = 'text-align: center; margin-bottom: 10px; color: #666; font-size: 12px;';
+    dateTimeInfo.innerHTML = `<strong>Start Date:</strong> ${startDateInput.value} &nbsp;&nbsp;&nbsp; <strong>Start Time:</strong> ${startTimeSelect.options[startTimeSelect.selectedIndex].text}`;
+    
+    // Create Campaigns display
+    const campaignNames = campaigns.map(c => c.name).join(', ');
+    const campaignNamesDiv = document.createElement('div');
+    campaignNamesDiv.style.cssText = 'text-align: center; margin-bottom: 15px; color: #444; font-size: 12px;';
+    campaignNamesDiv.innerHTML = `<strong>Campaigns:</strong> ${campaignNames}`;
+    
+    // Create download button
+    const downloadBtn = document.createElement('button');
+    downloadBtn.textContent = '📥 Download';
+    downloadBtn.style.cssText = 'display: none; margin: 0 auto 15px; margin-top:10px; background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;';
+    downloadBtn.onmouseover = () => downloadBtn.style.background = '#45a049';
+    downloadBtn.onmouseout = () => downloadBtn.style.background = '#4CAF50';
+    downloadBtn.onclick = () => downloadTableAsExcel();
+    
+    container.appendChild(title);
+    container.appendChild(dateTimeInfo);
+    container.appendChild(campaignNamesDiv);
+    
+    
+    // Get start date for hours display
+    const startDate = new Date(startDateInput.value + 'T00:00:00');
+    const [hours, minutes] = startTimeSelect.value.split(':').map(Number);
+    
+    // Create table
+    const table = document.createElement('table');
+    table.style.cssText = 'width: 100%; border-collapse: collapse; border: 1px solid #000000;';
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    
+    // Add column headers
+    ['Campaign', 'Audience Size'].forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        th.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; background: #f5f5f5; font-weight: bold; text-align: left;';
+        headerRow.appendChild(th);
+    });
+    
+    // Add hour columns with dates
+    for (let i = 0; i < hourCount; i++) {
+        const th = document.createElement('th');
+        const totalMinutes = hours * 60 + minutes + (i * 60);
+        const displayHours = Math.floor(totalMinutes / 60) % 24;
+        const displayMinutes = totalMinutes % 60;
+        const period = displayHours < 12 ? 'AM' : 'PM';
+        const hr12 = (displayHours % 12) === 0 ? 12 : (displayHours % 12);
+        const timeText = `${hr12}:${String(displayMinutes).padStart(2, '0')} ${period}`;
+        
+        const daysOffset = Math.floor(totalMinutes / (60 * 24));
+        const currentDate = new Date(startDate);
+        currentDate.setDate(currentDate.getDate() + daysOffset);
+        const monthNames = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
+        const dateText = `${monthNames[currentDate.getMonth()]} ${currentDate.getDate()}`;
+        
+        // Check if date is different from start date
+        const isDifferentDate = daysOffset > 0;
+        const dateColor = isDifferentDate ? '#ff0000' : '#888888';
+        
+        th.innerHTML = `<span style="font-weight: normal; font-size:0.8em;">${timeText}</span><br>Hour ${i + 1}<br><span style="font-size: 0.8em; color: ${dateColor};">${dateText}</span>`;
+        th.style.cssText = 'border: 1px solid #ddd; padding: 6px 4px; background: #f5f5f5; font-weight: bold; text-align: center; white-space: nowrap;';
+        headerRow.appendChild(th);
+    }
+    
+    const thTotal = document.createElement('th');
+    thTotal.textContent = 'Total';
+    thTotal.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; background: #f5f5f5; font-weight: bold; text-align: left; font-size: 1em;';
+    headerRow.appendChild(thTotal);
+    
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    // Create body
+    const tbody = document.createElement('tbody');
+    campaigns.forEach(campaign => {
+        const tr = document.createElement('tr');
+        
+        // Campaign
+        const tdName = document.createElement('td');
+        tdName.textContent = campaign.name;
+        tdName.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; white-space: nowrap;';
+        tr.appendChild(tdName);
+        
+        // Audience size
+        const tdAudience = document.createElement('td');
+        const audienceValue = parseNum(campaign.audience);
+        tdAudience.textContent = audienceValue === 0 ? '---' : fmt(audienceValue);
+        tdAudience.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; text-align: right; color: #0014ff;';
+        tr.appendChild(tdAudience);
+        
+        // Hour values
+        for (let i = 0; i < hourCount; i++) {
+            const td = document.createElement('td');
+            const hourValue = campaign.hourValues[i] || 0;
+            td.textContent = hourValue === 0 ? '---' : fmt(hourValue);
+            const isOffsetHour = i === (campaign.offset - 1);
+            const bgColor = isOffsetHour ? '#fffacd' : 'white';
+            td.style.cssText = `border: 1px solid #ddd; padding: 6px 4px; text-align: right; background: ${bgColor};`;
+            tr.appendChild(td);
         }
         
-        rows.push([]);
-        rows.push(["THROTTLE PLAN", `${hour1Value}`]);
-
-        const csvContent = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'throttle_plan.csv';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        // Total
+        const tdTotal = document.createElement('td');
+        const totalValue = campaign.hourValues.reduce((sum, val) => sum + (val || 0), 0);
+        tdTotal.textContent = totalValue === 0 ? '---' : fmt(totalValue);
+        tdTotal.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; text-align: right; font-weight: bold; font-size:1em;';
+        tr.appendChild(tdTotal);
+        
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    
+    // Create footer (grand totals)
+    const tfoot = document.createElement('tfoot');
+    const footerRow = document.createElement('tr');
+    footerRow.style.cssText = 'background: #f9f9f9; font-weight: bold;';
+    
+    const tdLabel = document.createElement('td');
+    tdLabel.textContent = 'Total';
+    tdLabel.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; font-weight: bold;';
+    footerRow.appendChild(tdLabel);
+    
+    const tdTotalAudience = document.createElement('td');
+    const totalAudience = campaigns.reduce((sum, c) => sum + parseNum(c.audience), 0);
+    tdTotalAudience.textContent = totalAudience === 0 ? '---' : fmt(totalAudience);
+    tdTotalAudience.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; text-align: right; font-weight: bold;';
+    footerRow.appendChild(tdTotalAudience);
+    
+    // Hour totals
+    for (let i = 0; i < hourCount; i++) {
+        const td = document.createElement('td');
+        const hourTotal = campaigns.reduce((sum, c) => sum + (c.hourValues[i] || 0), 0);
+        td.textContent = hourTotal === 0 ? '---' : fmt(hourTotal);
+        td.style.cssText = 'border: 1px solid #ddd; padding: 6px 4px; text-align: right; font-weight: bold;';
+        if (hourTotal > 500000) {
+            td.style.color = '#f44336';
+        }
+        footerRow.appendChild(td);
     }
+    
+    // Grand total volume
+    const tdGrandTotal = document.createElement('td');
+    const grandTotal = campaigns.reduce((sum, c) => sum + c.hourValues.reduce((s, v) => s + (v || 0), 0), 0);
+    tdGrandTotal.textContent = grandTotal === 0 ? '---' : fmt(grandTotal);
+    tdGrandTotal.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; text-align: right; font-weight: bold;';
+    if (grandTotal > 500000) {
+        tdGrandTotal.style.color = '#0014ff';
+    }
+    footerRow.appendChild(tdGrandTotal);
+    
+    tfoot.appendChild(footerRow);
+    table.appendChild(tfoot);
+    
+    // Assemble overlay
+    overlay.appendChild(closeBtn);
+    container.appendChild(table);
+    overlay.appendChild(container);
+    
+    container.appendChild(downloadBtn);
+    
+    document.body.appendChild(overlay);
+    
+    // Function to download table as Excel
+    function downloadTableAsExcel() {
+        // Create workbook data array
+
+    }
+}
+
 
     function escapeHtml(str) {
       if (str === null || str === undefined) return '';
