@@ -161,8 +161,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const queryOutput = document.getElementById('queryOutput');
 
         if (!currentAccountType) {
-            queryOutput.innerHTML = '<pre><code class="language-sql">-- Select an account type to view queries</code></pre>';
+            queryOutput.innerHTML = '<pre class="line-numbers"><code class="language-sql">-- Select an account type to view queries</code></pre>';
             Prism.highlightElement(queryOutput.querySelector('code'));
+                // Re-run Prism highlighting
+                Prism.highlightAll();
             return;
         }
 
@@ -179,10 +181,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Check if we have a generated query for this account type and part
         if (window.generatedQueries && window.generatedQueries[queryId]) {
-            queryOutput.innerHTML = `<pre><code class="language-sql">${escapeHtml(window.generatedQueries[queryId])}</code></pre>`;
+            queryOutput.innerHTML = `<pre class="line-numbers"><code class="language-sql">${escapeHtml(window.generatedQueries[queryId])}</code></pre>`;
             Prism.highlightElement(queryOutput.querySelector('code'));
         } else {
-            queryOutput.innerHTML = '<pre><code class="language-sql">-- SQL query will be generated here</code></pre>';
+            queryOutput.innerHTML = '<pre class="line-numbers"><code class="language-sql">-- SQL query will be generated here</code></pre>';
             Prism.highlightElement(queryOutput.querySelector('code'));
         }
     }
@@ -250,10 +252,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const devDataInputs = document.getElementById('devDataInputs');
 
     splitSelect.addEventListener('change', function() {
+    const devData1 = document.getElementById('devData1');
+    const devData2 = document.getElementById('devData2');
+    
         if (this.value > 1) {
             devDataInputs.classList.add('active');
         } else {
             devDataInputs.classList.remove('active');
+        }
+
+        // Handle dev data field enabling/disabling
+        if (this.value === '1') {
+            // Split 1: disable both
+            devData1.disabled = true;
+            devData2.disabled = true;
+        } else if (this.value === '2') {
+            // Split 2: enable dev1, disable dev2
+            devData1.disabled = false;
+            devData2.disabled = true;
+        } else if (this.value === '3') {
+            // Split 3: enable both
+            devData1.disabled = false;
+            devData2.disabled = false;
         }
 
         // Update number buttons based on new split value
