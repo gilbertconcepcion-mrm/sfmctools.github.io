@@ -19,7 +19,7 @@ function generateQuerySendlist(config, tierName) {
     
     let queryOptin = ``;
     // Part 1 - Opt-in
-    if(config.optin && config.optin !=="NA"){
+    if(config.optIn && config.optIn !=="NA"){
         queryOptin = config.optIn ? `AND s.[${config.optIn}] = 'Y'` : ``;
     }
     

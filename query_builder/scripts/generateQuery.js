@@ -31,7 +31,7 @@ function generateQuery(config, tierName) {
     const queryWhere = `WHERE 1=1`;
     const queryMemberStatus = `AND s.MemberStatus = '${config.member.membership}'`;
     let queryOptin = ``;
-    if(config.optin && config.optin !=="NA"){
+    if(config.optIn && config.optIn !=="NA"){
         queryOptin = config.optIn ? `AND s.[${config.optIn}] = 'Y'` : ``;
     }
     const queryTier = tierName ? `AND s.LoyaltyAccountPortfolioID IN (SELECT LoyaltyAccountPortfolioID FROM [Master_LoyaltyPortfolioID] WHERE Tier = '${tierName}' AND ActiveStatus='True')` : ``;
