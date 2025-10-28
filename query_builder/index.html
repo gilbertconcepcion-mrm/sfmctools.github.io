@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SQL Query Builder</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-vsc-dark-plus.min.css"/>
+    <!-- Prism.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <!-- Prism.js Line Numbers Plugin CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
     <script src="scripts/global.js"></script>
     <script src="scripts/generateQuery.js"></script>
     <style>
@@ -54,6 +57,7 @@ body {
     display: grid;
     grid-template-columns: 410px 1fr;
     gap: 0;
+    overflow-y: scroll;
 }
 
 /* Left Dashboard Column */
@@ -579,6 +583,25 @@ select:focus, input[type="text"]:focus {
 .notification.show {
     opacity: 1;
 }
+        
+/* Editable fields - light yellow */
+input[type="text"]:not(:disabled) {
+    background-color: #fffbea; /* light yellow */
+}
+
+input[type="text"]:not(:disabled):focus {
+    background-color: #fff9db; /* slightly darker yellow on focus */
+    border-color: #667eea;
+}
+
+/* Disabled fields - greyish */
+input[type="text"]:disabled {
+    background-color: #e9ecef; /* greyish */
+    color: #6c757d; /* grey text */
+    cursor: not-allowed;
+    opacity: 0.7;
+    border-color: #ced4da;
+}
 
 /* Responsive Design */
 @media (max-width: 1200px) {
@@ -653,7 +676,9 @@ select:focus, input[type="text"]:focus {
     .generate-button {
         width: 100%;
     }
-}       
+        
+}
+
     </style>
     
 </head>
@@ -779,11 +804,11 @@ select:focus, input[type="text"]:focus {
                         <div class="dev-data-inputs" id="devDataInputs">
                             <div class="dev-data-input">
                                 <div class="control-label">Dev Data Source 1</div>
-                                <input type="text" id="devData1" placeholder="e.g., DEV_DATA">
+                                <input type="text" id="devData1" placeholder="e.g., DEV_20251027_MPG_ADH_MOVIE_TITLE">
                             </div>
                             <div class="dev-data-input">
                                 <div class="control-label">Dev Data Source 2</div>
-                                <input type="text" id="devData2" placeholder="e.g., DEV_DATA_2">
+                                <input type="text" id="devData2" placeholder="e.g., DEV_20251027_MPG_ADH_MOVIE_TITLE_2">
                             </div>
                         </div>
                         
@@ -793,7 +818,7 @@ select:focus, input[type="text"]:focus {
                         </div>
                         <div class="dev-data-input" style="padding: 10px 0px 0px 0px;">
                             <div class="control-label">SENDLIST DE</div>
-                            <input type="text" id="sendlistDE" placeholder="e.g., 20251011_FLM_Sendlist">
+                            <input type="text" id="sendlistDE" placeholder="e.g., 20251011_FLM_MOVIE_Sendlist">
                         </div>
                     </div>
                     
@@ -832,7 +857,7 @@ select:focus, input[type="text"]:focus {
                                 <input type="checkbox" id="engagementFilter">
                                 <label for="engagementFilter">Open and Click 6 Months.</label>
                             </div>
-                            <div class="checkbox-item">
+                            <div class="checkbox-item" style="margin-top: 5px;">
                                 <input type="checkbox" id="complaintsFilter">
                                 <label for="complaintsFilter">Complaints Removal.</label>
                             </div>
@@ -898,7 +923,7 @@ select:focus, input[type="text"]:focus {
                     <div class="query-output-container">
                         <div class="query-part-label" id="queryPartLabel">Select an account type</div>
                         <div class="query-output" id="queryOutput">
-                            <pre><code class="language-sql">-- Select an account type to view queries</code></pre>
+                            <pre class="line-numbers"><code class="language-sql">-- Select an account type to view queries</code></pre>
                         </div>
                         <button class="copy-button" id="copyButton">Copy Query</button>
                     </div>
@@ -910,8 +935,12 @@ select:focus, input[type="text"]:focus {
     <div class="notification" id="notification">Queries generated successfully!</div>
     
     <!-- Prism.js for syntax highlighting -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/prism-sql.min.js"></script>
+    <!-- Prism.js Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <!-- Prism.js SQL Language Support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    <!-- Prism.js Line Numbers Plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
     <script src="scripts/logic.js"></script>
 </body>
 </html>
