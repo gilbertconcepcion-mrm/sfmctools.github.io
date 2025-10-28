@@ -1,3 +1,5 @@
+let hasTierToQuery = false;
+let queryType = "";
 let config = {
     tier:{
         mac:{

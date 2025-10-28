@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQL Query Builder</title>
+    <title>SQL Query Builder - Transactional</title>
     <!-- Prism.js CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <!-- Prism.js Line Numbers Plugin CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
     <script src="scripts/global.js"></script>
-    <script src="scripts/generateQuery.js"></script>
+    <script src="scripts/generateQueryTransactional.js"></script>
     <style>
 /* Reset and Base Styles */
 * {
@@ -945,7 +945,7 @@ input[type="text"]:disabled {
                             <div class="status-label">Account Types:</div>
                             <div class="status-value status-empty">None selected</div>
                         </div>
-                        <div class="status-section">
+                        <div class="status-section" style="display: none !important;">
                             <div class="status-label">Genre Targeting:</div>
                             <div class="status-value status-empty">None selected</div>
                         </div>
@@ -967,7 +967,7 @@ input[type="text"]:disabled {
             
             <!-- Output Column -->
             <div class="output-column">
-                <div class="queries-title">Queries - Genre</div>
+                <div class="queries-title">Queries - Transactional</div>
                 
                 <div class="tabs-container">
                     <div class="tabs" id="tabs">
@@ -1010,7 +1010,7 @@ input[type="text"]:disabled {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
     <!-- Prism.js Line Numbers Plugin -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
-    <script src="scripts/logic.js"></script>
+    <script src="scripts/logic_transactional.js"></script>
     <script src="scripts/selector.js"></script>
 </body>
 </html>

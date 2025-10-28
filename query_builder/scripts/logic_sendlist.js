@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(cb.id)
         });
 
-        if (accountTypes.length === 0) {
+        if (accountTypes.length === 0 ) {
             // Show notification if no account types selected
             notification.textContent = 'Please select at least one account type';
             notification.style.background = '#e74c3c';
@@ -342,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Generate queries for each account type
         accountTypes.forEach(type => {
             const tierName = config.tier[type].key1;
-            const queryParts = generateQuery(config, tierName);
+            const queryParts = generateQuerySendlist(config, tierName);
 
             if (config.query.split === "1") {
                 // Store the full query without splitting
