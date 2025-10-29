@@ -1084,6 +1084,7 @@ document.getElementById('campaignType').addEventListener('change', e => {
         // Show Genre Dashboard
         document.querySelector('.dashboard-tab[data-tab="genreTargeting"]').classList.add('active');
         document.getElementById('genreTargeting').classList.add('active');
+        document.querySelector('.queries-title').textContent = 'Queries - Genre';
     } else if (campaignType === 'sendlist') {
         // Show Query Settings and highlight Sendlist DE field
         document.querySelector('.dashboard-tab[data-tab="queryConfig"]').classList.add('active');
@@ -1092,10 +1093,12 @@ document.getElementById('campaignType').addEventListener('change', e => {
         // Highlight sendlistDE field
         document.getElementById('sendlistDE').style.backgroundColor = '#fff9db';
         document.getElementById("transactionalField").style.display = "block";
+        document.querySelector('.queries-title').textContent = 'Queries - Sendlist';
     } else if (campaignType === 'transactional') {
         // Go to Query Settings and disable Split selector
         document.querySelector('.dashboard-tab[data-tab="queryConfig"]').classList.add('active');
         document.getElementById('queryConfig').classList.add('active');
+        document.querySelector('.queries-title').textContent = 'Queries - Transactional';
         
         // Disable split selector
         document.getElementById('split').disabled = true;
