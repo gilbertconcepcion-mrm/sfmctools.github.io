@@ -35,9 +35,18 @@ function showNotification(message, type = 'success') {
     setTimeout(() => notification.classList.remove('show'), 2500);
 }
 
+function goBackToGenre(){
+    document.getElementById('campaignType').value = 'genre';
+    // Enable Genre selection and tab on reset
+    const genreTab = document.querySelector('.dashboard-tab[data-tab="genreTargeting"]');
+    const genresSelect = document.getElementById('genres');
+    genreTab.classList.remove('disabled');
+    genresSelect.disabled = false; 
+}
 function resetAllSettings() {
     // Reset campaign type to default
     if(actionType !=="campaign"){
+        campaign = "genre";
         document.getElementById('campaignType').value = 'genre';
         // Enable Genre selection and tab on reset
         const genreTab = document.querySelector('.dashboard-tab[data-tab="genreTargeting"]');
@@ -144,7 +153,7 @@ function resetAllSettings() {
     updateStatus();
     
     // Update query display with reset values
-    displayQuery(null, activeQueryPart);
+    displayQuery(null, 1);
     
     // Show notification
     showNotification('All settings have been reset to default', 'info');
