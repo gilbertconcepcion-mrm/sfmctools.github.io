@@ -23,6 +23,7 @@ let activeTier = null; // The currently displayed tier (can be null)
 let activeQueryPart = 1; // The currently displayed query part (1, 2, or 3)
 let generatedQueries = null; // Store the generated queries
 let actionType = "";
+let campaign = "genre";
 
 // Show notification function
 function showNotification(message, type = 'success') {
@@ -149,6 +150,157 @@ function resetAllSettings() {
     showNotification('All settings have been reset to default', 'info');
 }
 
+
+// Generate query function for Sendlist campaigns
+function generateQuerySendlist(config, tierName) {
+    let ccampaign = document.getElementById('campaignType').value;
+    let adF = config.query.additionalFields;
+    let sDField = config.query.sendlistDataField;
+    let joinField = config.query.joinFieldSubscriber;
+    
+    let commaSep = adF && adF.trim() !== '' ? ', ' : '';
+    
+    // Base SELECT clause
+    let qf = `SELECT s.[EmailAddress], s.[AMCStubsCardNumber], s.[AMCStubsKobieAccountID], s.[MemberStatus], s.[FirstName], s.[LastName], s.[DateOfBirth], s.[Age21PlusIndicator], s.[Age18to21Indicator], s.[Age13to18Indicator], s.[AMCStubsAccountInformationEmailOptIn], s.[AMCStubsMemberRewardsSummaryEmailOptIn], s.[AMCStubsMemberRewardsEmailOptIn], s.[AMCStubsMembershipExpirationDate], s.[AMCStubsRewardsExpirationDate], s.[TotalAMCStubsRewardsBalance], s.[SpendToAMCStubsNextReward], s.[State], s.[City], s.[PostalCode], s.[PreferredTheatreNumber], s.[AMCStubsSpecialOfferOptInIndicator], s.[LoyaltyAccountType], s.[CurrentPointCount], s.[PendingPointCount]${commaSep}${adF}`;
+    
+    // Transactional campaign has fewer fields
+    if(ccampaign === "transactional"){
+        qf = `SELECT s.[EmailAddress], s.[AMCStubsCardNumber], s.[AMCStubsKobieAccountID], s.[MemberStatus], s.[FirstName], s.[LastName], s.[DateOfBirth]${commaSep}${adF}`;
+    }
+    
+    // FROM clause
+    const qs1 = `FROM [AMC_Subscribers] AS s WITH (NOLOCK)`;
+    
+    // Genre JOIN (if applicable)
+    const qg1 = ccampaign === 'genre' && config.genre && config.genre !== "NONE" 
+        ? `INNER JOIN [AMC_Genre_targeting] al ON al.LOYALTYACCOUNTID = s.AMCStubsKobieAccountID` 
+        : ``;
+    
+    // Sendlist JOIN - required for sendlist queries
+    let qsl = ``;
+    if (config.query.sendlist && config.query.sendlist.trim() !== "") {
+        if(ccampaign === "transactional"){
+            qsl = `INNER JOIN [${config.query.sendlist}] al ON al.[${sDField}] = s.[${joinField}]`;
+        } else {
+            qsl = `INNER JOIN [${config.query.sendlist}] al ON al.[${sDField}] = s.[${joinField}]`;
+        }
+    }
+    
+    // WHERE clause
+    const qw = `WHERE 1=1`;
+    
+    // Member status filter
+    const qms = `AND s.MemberStatus = '${config.member.membership}'`;
+    
+    // Opt-in filter
+    let qo = ``;
+    if (config.optIn && config.optIn !== "NA" && config.optIn !== "Not Selected" && config.optIn !== "None Selected" && config.optIn.trim() !== "") {
+        qo = `AND s.[${config.optIn}] = 'Y'`;
+    }
+    
+    // Tier filter - modified to support multiple tiers
+    let qt = ``;
+    if (tierName) {
+        if (Array.isArray(tierName)) {
+            const tierList = tierName.map(t => `'${t}'`).join(', ');
+            qt = `AND s.LoyaltyAccountPortfolioID IN (SELECT LoyaltyAccountPortfolioID FROM [Master_LoyaltyPortfolioID] WHERE Tier IN (${tierList}) AND ActiveStatus='True')`;
+        } else {
+            qt = `AND s.LoyaltyAccountPortfolioID IN (SELECT LoyaltyAccountPortfolioID FROM [Master_LoyaltyPortfolioID] WHERE Tier = '${tierName}' AND ActiveStatus='True')`;
+        }
+    }
+    
+    // Genre filter
+    const qg2 = ccampaign === 'genre' && config.genre && config.genre !== "NONE" 
+        ? `AND (al.[${config.genre}] = 'True')` 
+        : ``;
+    
+    // Age indicators filter
+    let qage = ``;
+    if (config.member.ageIndicators === "Y") {
+        qage = `AND (s.Age13to18Indicator = 'Y' OR s.Age18to21Indicator = 'Y' OR s.Age21PlusIndicator = 'Y')`;
+    }
+    
+    // Date of birth filter
+    let qdob = ``;
+    if (config.member.age && config.member.age !== "NA" && !isNaN(config.member.age)) {
+        qdob = `AND (ISNULL(s.[DateOfBirth], '') <> '' AND s.DateOfBirth <= DATEADD(year, -${parseInt(config.member.age)}, GETDATE()))`;
+    }
+    
+    // Active subscriber status
+    const qas = config.member.activeStatus === "Active" 
+        ? `AND EXISTS(SELECT 1 FROM [All_Subscribers_Status_Staging] AS sub WITH (NOLOCK) WHERE s.EmailAddress = sub.SubscriberKey AND sub.Status = 'Active')` 
+        : ``;
+    
+    // Complaints removal
+    const qc = config.complaintsRemoval === "Y" 
+        ? `AND NOT EXISTS(SELECT 1 FROM [_Complaint] com WITH (NOLOCK) WHERE s.EmailAddress = com.SubscriberKey)` 
+        : ``;
+    
+    // AMC Master Suppression
+    const qams = config.amcMasterSupression === "Y" 
+        ? `AND NOT EXISTS(SELECT 1 FROM [AMC_MasterSuppression] cpesl WITH (NOLOCK) WHERE s.EmailAddress = cpesl.EmailAddress)` 
+        : ``;
+    
+    // Associate Suppression - using COALESCE for NULL handling
+    const qasup = config.associateSupression === "Y" 
+        ? `AND COALESCE(s.AMCStubsCardNumber,0) NOT LIKE '1104%' AND COALESCE(s.AMCStubsCardNumber,0) NOT LIKE '11094%'` 
+        : ``;
+    
+    // FreshAddress Exclusions
+    const qfa = config.freshAddressExclude === "Y" 
+        ? `AND NOT EXISTS(SELECT 1 FROM [FreshAddress_Exclusions_MRM] f WITH (NOLOCK) WHERE s.EmailAddress = f.EmailAddress)` 
+        : ``;
+    
+    // Engagement filter
+    const qe = config.engagement === "Y" 
+        ? `AND (EXISTS(SELECT 1 FROM [CLICK_ENGAGEMENT_LAST_6_MONTHS] c WITH (NOLOCK) WHERE s.EmailAddress = c.SubscriberKey) OR EXISTS(SELECT 1 FROM [LastOpen_6Months] o WITH (NOLOCK) WHERE s.EmailAddress = o.EmailAddress))` 
+        : ``;
+
+    // Helper functions
+    function getDate() {
+        const d = new Date();
+        return String(d.getFullYear()).slice(-2) + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+    }
+
+    function replaceTier(src, code) {
+        if (!src) return '';
+        if (!code) return src;
+        const re = /(^|[^A-Za-z0-9])(?:MAC|MEA|MEI|MEP|MPG)(?=[^A-Za-z0-9]|$)/gi;
+        return src.replace(re, (m, p1) => (p1 || '') + String(code).toUpperCase());
+    }
+
+    // Get tier code if applicable
+    let tcode = '';
+    if (tierName && !Array.isArray(tierName)) {
+        for (let k in config.tier) {
+            if (config.tier[k].key1 === tierName) {
+                tcode = config.tier[k].key2;
+                break;
+            }
+        }
+    }
+
+    // Generate query based on split configuration
+    if (config.query.split === "1") {
+        const full = [qf, qs1, qg1, qsl, qw, qms, qo, qt, qg2, qage, qdob, qas, qc, qams, qasup, qfa, qe].filter(x => x !== '').join('\n');
+        return { full };
+    } else if (config.query.split === "2") {
+        const p1 = [qf, qs1, qg1, qsl, qw, qms, qo, qt, qg2, qage, qdob, qas, qc].filter(x => x !== '').join('\n');
+        const p2t = config.query.dev1 ? replaceTier(config.query.dev1, tcode) : `DEV_${getDate()}_${tcode || 'ALL'}_PLACEHOLDER`;
+        const p2s = `FROM [${p2t}] AS s WITH (NOLOCK)`;
+        const p2 = [qf, p2s, qw, qams, qasup, qfa, qe].filter(x => x !== '').join('\n');
+        return { part1: p1, part2: p2 };
+    } else if (config.query.split === "3") {
+        const p1 = [qf, qs1, qg1, qsl, qw, qms, qo, qt, qg2, qage, qdob, qas, qc].filter(x => x !== '').join('\n');
+        const p2t = config.query.dev1 ? replaceTier(config.query.dev1, tcode) : `DEV_${getDate()}_${tcode || 'ALL'}_PLACEHOLDER_1`;
+        const p2s = `FROM [${p2t}] AS s WITH (NOLOCK)`;
+        const p2 = [qf, p2s, qw, qams, qasup, qfa].filter(x => x !== '').join('\n');
+        const p3t = config.query.dev2 ? replaceTier(config.query.dev2, tcode) : `DEV_${getDate()}_${tcode || 'ALL'}_PLACEHOLDER_2`;
+        const p3s = `FROM [${p3t}] AS s WITH (NOLOCK)`;
+        const p3 = [qf, p3s, qw, qe].filter(x => x !== '').join('\n');
+        return { part1: p1, part2: p2, part3: p3 };
+    }
+}
 // Generate query function
 function generateQuery(config, tierName) {
     let ccampaign = document.getElementById('campaignType').value;
@@ -235,6 +387,63 @@ function generateQuery(config, tierName) {
         const p3 = [qf, p3s, qw, qe].filter(x => x !== '').join('\n');
         return { part1: p1, part2: p2, part3: p3 };
     }
+}
+
+// Generate query function for transactional campaigns
+function generateQueryTransactional(config, tierName) {
+    let adF = config.query.additionalFields;
+    let sDField = config.query.sendlistDataField;
+    let joinField = config.query.joinFieldSubscriber;
+    
+    let commaSep = adF && adF.trim() !== '' ? ',' : '';
+    
+    // For transactional campaigns, we only need these fields
+    let qf = `SELECT s.[EmailAddress], s.[AMCStubsCardNumber], s.[AMCStubsKobieAccountID], s.[MemberStatus], s.[FirstName], s.[LastName], s.[DateOfBirth]${commaSep}${adF}`;
+    
+    const qs1 = `FROM [AMC_Subscribers] AS s WITH (NOLOCK)`;
+    
+    // For transactional campaigns, we always join with the sendlist
+    let qsl = `INNER JOIN [${config.query.sendlist}] al ON al.[${sDField}] = s.[${joinField}]`;
+    
+    const qw = `WHERE s.MemberStatus = '${config.member.membership}'`;
+    
+    // Opt-in condition
+    let qo = ``;
+    if (config.optIn && config.optIn !== "NA" && config.optIn !== "Not Selected" && config.optIn !== "None Selected" && config.optIn.trim() !== "") {
+        qo = `AND s.[${config.optIn}] = 'Y'`;
+    }
+    
+    // Tier condition
+    const qt = tierName ? `AND s.LoyaltyAccountPortfolioID IN ('${tierName}')` : ``;
+    
+    // Age condition - using DATEDIFF to match the template
+    let qdob = ``;
+    if (config.member.age && config.member.age !== "NA" && !isNaN(config.member.age)) {
+        qdob = `AND DATEDIFF(yy, s.DateOfBirth, GETDATE()) >= ${parseInt(config.member.age)}`;
+    }
+    
+    // Active status condition - updated to match the template
+    const qas = config.member.activeStatus === "Active" ? `AND EXISTS(SELECT 1 FROM All_Subscribers_Status_Staging sub WITH(NOLOCK) WHERE sub.SubscriberKey = s.EmailAddress AND sub.Status='Active')` : ``;
+    
+    // Complaint removal condition - updated to match the template
+    const qc = config.complaintsRemoval === "Y" ? `AND NOT EXISTS(SELECT 1 FROM _Complaint c WITH(NOLOCK) WHERE c.SubscriberKey = s.EmailAddress)` : ``;
+    
+    // AMC master suppression condition - updated to match the template
+    const qams = config.amcMasterSupression === "Y" ? `AND NOT EXISTS(SELECT 1 FROM [AMC_MasterSuppression] m WITH(NOLOCK) WHERE m.EmailAddress = s.EmailAddress)` : ``;
+    
+    // Associate suppression condition - updated to match the template
+    const qasup = config.associateSupression === "Y" ? `AND COALESCE(s.AMCStubsCardNumber, '') NOT LIKE '1104%' AND COALESCE(s.AMCStubsCardNumber, '') NOT LIKE '11094%'` : ``;
+    
+    // Fresh address exclusion condition - updated to match the template
+    const qfa = config.freshAddressExclude === "Y" ? `AND NOT EXISTS(SELECT 1 FROM FreshAddress_Exclusions_MRM f WITH(NOLOCK) WHERE f.EmailAddress = s.EmailAddress)` : ``;
+    
+    // Engagement condition - updated to match the template with proper parentheses
+    const qe = config.engagement === "Y" ? `AND (EXISTS(SELECT 1 FROM CLICK_ENGAGEMENT_LAST_6_MONTHS c WITH(NOLOCK) WHERE c.SubscriberKey = s.EmailAddress) OR EXISTS(SELECT 1 FROM LastOpen_6Months o WITH(NOLOCK) WHERE o.EmailAddress = s.EmailAddress))` : ``;
+    
+    // Combine all parts to form the complete query
+    const full = [qf, qs1, qsl, qw, qo, qt, qdob, qas, qc, qams, qasup, qfa, qe].filter(x => x !== '').join('\n');
+    
+    return { full };
 }
 
 // Escape HTML function
@@ -369,7 +578,17 @@ function displayQuery(tierName, part = 1) {
     const btn = document.getElementById('copyButton');
     
     // Store the generated queries
-    generatedQueries = generateQuery(config, tierName);
+    
+    if(campaign === "transactional"){
+        generatedQueries = generateQueryTransactional(config, tierName);
+//        console.log(generatedQueries);
+    }else if(campaign ==="genre"){
+        generatedQueries = generateQuery(config, tierName);
+//        console.log(generatedQueries);
+    }else if(campaign === "sendlist"){
+        generatedQueries = generateQuerySendlist(config, tierName);
+    }
+    
     
     // Update label based on whether we have a specific tier or not
     if (tierName) {
@@ -816,6 +1035,7 @@ document.getElementById('complaintsFilter').addEventListener('change', e => {
 document.getElementById('campaignType').addEventListener('change', e => {
     const campaignType = e.target.value;
     actionType = "campaign";
+    campaign = e.target.value;
     resetAllSettings();
     // Reset all tabs to inactive
     document.querySelectorAll('.dashboard-tab').forEach(tab => {
@@ -856,6 +1076,7 @@ document.getElementById('campaignType').addEventListener('change', e => {
         
         // Highlight sendlistDE field
         document.getElementById('sendlistDE').style.backgroundColor = '#fff9db';
+        document.getElementById("transactionalField").style.display = "block";
     } else if (campaignType === 'transactional') {
         // Go to Query Settings and disable Split selector
         document.querySelector('.dashboard-tab[data-tab="queryConfig"]').classList.add('active');
