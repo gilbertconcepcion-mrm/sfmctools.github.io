@@ -762,6 +762,28 @@ document.querySelectorAll('.query-part-tab').forEach(tab => {
         } else {
             displayQuery(null, activeQueryPart);
         }
+        
+        // --- New code to copy the query on click ---
+        let queryToCopy = '';
+        if (config.query.split === "1") {
+            queryToCopy = generatedQueries.full;
+        } else if (config.query.split === "2") {
+            queryToCopy = (activeQueryPart === 1) ? generatedQueries.part1 : generatedQueries.part2;
+        } else if (config.query.split === "3") {
+            if (activeQueryPart === 1) {
+                queryToCopy = generatedQueries.part1;
+            } else if (activeQueryPart === 2) {
+                queryToCopy = generatedQueries.part2;
+            } else {
+                queryToCopy = generatedQueries.part3;
+            }
+        }
+
+        if (queryToCopy) {
+            copyToClipboard(queryToCopy);
+        }
+        // --- End of new code ---        
+        
     });
 });
 
