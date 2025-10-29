@@ -572,23 +572,20 @@ function updateStatus() {
 }
 
 // Display query function
+// Display query function
 function displayQuery(tierName, part = 1) {
     const output = document.getElementById('queryOutput');
     const label = document.getElementById('queryPartLabel');
     const btn = document.getElementById('copyButton');
     
     // Store the generated queries
-    
     if(campaign === "transactional"){
         generatedQueries = generateQueryTransactional(config, tierName);
-//        console.log(generatedQueries);
     }else if(campaign ==="genre"){
         generatedQueries = generateQuery(config, tierName);
-//        console.log(generatedQueries);
     }else if(campaign === "sendlist"){
         generatedQueries = generateQuerySendlist(config, tierName);
     }
-    
     
     // Update label based on whether we have a specific tier or not
     if (tierName) {
@@ -605,29 +602,38 @@ function displayQuery(tierName, part = 1) {
         }
     }
 
-    // Display only the requested part
+    // Display only the requested part and set up copy button
     if (config.query.split === "1") {
         output.innerHTML = `<pre><code class="language-sql">${escapeHtml(generatedQueries.full)}</code></pre>`;
         btn.style.display = 'block';
         btn.onclick = () => copyToClipboard(generatedQueries.full);
     } else if (config.query.split === "2") {
+        let currentQuery;
         if (part === 1) {
-            output.innerHTML = `<pre><code class="language-sql">${escapeHtml(generatedQueries.part1)}</code></pre>`;
+            currentQuery = generatedQueries.part1;
+            output.innerHTML = `<pre><code class="language-sql">${escapeHtml(currentQuery)}</code></pre>`;
         } else {
-            output.innerHTML = `<pre><code class="language-sql">${escapeHtml(generatedQueries.part2)}</code></pre>`;
+            currentQuery = generatedQueries.part2;
+            output.innerHTML = `<pre><code class="language-sql">${escapeHtml(currentQuery)}</code></pre>`;
         }
         btn.style.display = 'block';
-        btn.onclick = () => copyToClipboard(generatedQueries.part1 + '\n\n' + generatedQueries.part2);
+        // Copy only the currently visible part
+        btn.onclick = () => copyToClipboard(currentQuery);
     } else if (config.query.split === "3") {
+        let currentQuery;
         if (part === 1) {
-            output.innerHTML = `<pre><code class="language-sql">${escapeHtml(generatedQueries.part1)}</code></pre>`;
+            currentQuery = generatedQueries.part1;
+            output.innerHTML = `<pre><code class="language-sql">${escapeHtml(currentQuery)}</code></pre>`;
         } else if (part === 2) {
-            output.innerHTML = `<pre><code class="language-sql">${escapeHtml(generatedQueries.part2)}</code></pre>`;
+            currentQuery = generatedQueries.part2;
+            output.innerHTML = `<pre><code class="language-sql">${escapeHtml(currentQuery)}</code></pre>`;
         } else {
-            output.innerHTML = `<pre><code class="language-sql">${escapeHtml(generatedQueries.part3)}</code></pre>`;
+            currentQuery = generatedQueries.part3;
+            output.innerHTML = `<pre><code class="language-sql">${escapeHtml(currentQuery)}</code></pre>`;
         }
         btn.style.display = 'block';
-        btn.onclick = () => copyToClipboard(generatedQueries.part1 + '\n\n' + generatedQueries.part2 + '\n\n' + generatedQueries.part3);
+        // Copy only the currently visible part
+        btn.onclick = () => copyToClipboard(currentQuery);
     }
     
     // Re-highlight the code
