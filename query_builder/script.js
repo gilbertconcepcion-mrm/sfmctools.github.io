@@ -475,6 +475,13 @@ function copyToClipboard(text) {
         showNotification('Failed to copy query', 'error');
     });
 }
+function copyToClipboard_DE_Name(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('Data Extension Name Copied');
+    }).catch(err => {
+        showNotification('Faield to copy DE name', 'error');
+    });
+}
 
 // Update status function
 function updateStatus() {
@@ -486,7 +493,7 @@ function updateStatus() {
     
     // Account Types
     statusHTML += '<div class="status-section">';
-    statusHTML += '<div class="status-label">Account Types:</div>';
+    statusHTML += '<div class="status-label">Targeted Tiers:</div>';
     const selectedTiers = [];
     document.querySelectorAll('#accountTypes input[type="checkbox"]:checked').forEach(cb => {
         selectedTiers.push(cb.dataset.tierName);
@@ -527,7 +534,7 @@ function updateStatus() {
     
     // Member Status
     statusHTML += '<div class="status-section">';
-    statusHTML += '<div class="status-label">Member Status:</div>';
+    statusHTML += '<div class="status-label">Member Data:</div>';
     const isMember = document.getElementById('memberStatus').checked;
     const isActive = document.getElementById('activeStatus').checked;
     const ageFilter = document.getElementById('age').value;
@@ -546,10 +553,10 @@ function updateStatus() {
     else if (splitValue === '2') configText += 'Split to 2 Parts';
     else if (splitValue === '3') configText += 'Split to 3 Parts';
     configText += ')';
-    const devData1 = document.getElementById('devData1').value;
-    const devData2 = document.getElementById('devData2').value;
-    if (devData1) configText += ', ' + devData1;
-    if (devData2) configText += ', ' + devData2;
+//    const devData1 = document.getElementById('devData1').value;
+//    const devData2 = document.getElementById('devData2').value;
+//    if (devData1) configText += ', ' + devData1;
+//    if (devData2) configText += ', ' + devData2;
     statusHTML += '<div class="status-value">' + configText + '</div>';
     statusHTML += '</div>';
     
@@ -745,6 +752,7 @@ function updateSegmentReferenceTier(){
     debugVal0 = debugVal0.substring(4);
     let debugVal1 = config.query.dev1;
     let debugVal2 = config.query.dev2;
+    let split = config.query.split;
     
     let newDebugVal1 = debugVal0;
     let newDebugVal2 = debugVal1;
@@ -762,12 +770,21 @@ function updateSegmentReferenceTier(){
 //        console.log(activeQueryPart, tierUpper);
      }
     
-    if(activeQueryPart === 1){
-        document.getElementById("segmentReference").value = newDebugVal1;
-    }else if(activeQueryPart === 2){
+    if(split === "2"){
+      if(activeQueryPart === 1){
         document.getElementById("segmentReference").value = newDebugVal2;
-    }else if(activeQueryPart === 3){
-        document.getElementById("segmentReference").value = newDebugVal3;
+      }else if(activeQueryPart === 2){
+            document.getElementById("segmentReference").value = newDebugVal1;
+      }      
+    }else if (split === "3"){
+      if(activeQueryPart === 1){
+        document.getElementById("segmentReference").value = newDebugVal2;
+      }else if(activeQueryPart === 2){
+            document.getElementById("segmentReference").value = newDebugVal3;
+      } 
+      else if(activeQueryPart === 3){
+            document.getElementById("segmentReference").value = newDebugVal1;
+      }
     }
     
     document.getElementById("devData1").value = newDebugVal2;
@@ -861,7 +878,9 @@ document.querySelectorAll('.query-part-tab').forEach(tab => {
         }
 
         if (queryToCopy) {
-            copyToClipboard(queryToCopy);
+//            copyToClipboard(queryToCopy);
+//            COPY THE DE NAME
+            copyToClipboard_DE_Name(document.getElementById("segmentReference").value);
         }
         // --- End of new code ---        
         
