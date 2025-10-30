@@ -55,7 +55,8 @@ body {
     display: grid;
     grid-template-columns: 410px 1fr;
     gap: 0;
-    overflow-y: scroll;
+    overflow-y: visible;
+    height: auto;
 }
 
 /* Left Dashboard Column */
@@ -447,7 +448,7 @@ select:focus, input[type="text"]:focus {
     transition: all 0.3s ease;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     margin-bottom: 2px;
-    display: none;
+    display: block;
 }
 
 .generate-button:hover {
@@ -876,10 +877,10 @@ select:disabled {
                             </div>
                         </div>
                     </div>
-                    
                     <!-- Query Configuration Section -->
                     <div class="dashboard-section" id="queryConfig">
                         <div class="section-title">Query Configuration</div>
+                        
                         <div class="control-group">
                             <div class="control-label">Query Split</div>
                             <select id="split">
@@ -890,15 +891,18 @@ select:disabled {
                         </div>
                         <div class="dev-data-inputs" id="devDataInputs">
                             <div class="dev-data-input">
-                                <div class="control-label">Dev Data Source 1</div>
+                                <div class="control-label">DEV Reference 1</div>
                                 <input type="text" id="devData1" placeholder="e.g., DEV_20251027_MPG_ADH_MOVIE_TITLE">
                             </div>
                             <div class="dev-data-input">
-                                <div class="control-label">Dev Data Source 2</div>
+                                <div class="control-label">DEV Reference 2</div>
                                 <input type="text" id="devData2" placeholder="e.g., DEV_20251027_MPG_ADH_MOVIE_TITLE_2">
                             </div>
                         </div>
-                        
+                         <div class="dev-data-input" style="padding: 10px 0px 0px 0px;">
+                            <div class="control-label">SEGMENT REFERENCE</div>
+                            <input type="text" id="segmentReference" placeholder="e.g., 20251027_MPG_ADH_MOVIE_TITLE">
+                        </div>                       
                         <div class="dev-data-input" style="padding: 10px 0px 0px 0px;">
                             <div class="control-label">Additional Fields</div>
                             <input type="text" id="additonalField" placeholder="e.g., s.[NAME]">
@@ -925,18 +929,23 @@ select:disabled {
                     <div class="dashboard-section" id="emailEngagement">
                         <div class="section-title"></div>
                         <div class="control-group">
-                            <div class="control-label">Opt-in-Condition</div>
+                            <div class="control-label">OPT-IN FLAG</div>
                             <select id="emailOptIn">
-                                <option value="" selected>NA</option>
-                                <option value="AMCStubsSpecialOfferOptInIndicator" >AMCStubsSpecialOfferOptInIndicator</option>
+                                <option value="" >NA</option>
+                                <option value="AMCStubsSpecialOfferOptInIndicator" selected>AMCStubsSpecialOfferOptInIndicator</option>
                                 <option value="AMCMyMoviesQueueOptIn">AMCMyMoviesQueueOptIn</option>
                                 <option value="AMCStubsAccountInformationEmailOptin">AMCStubsAccountInformationEmailOptin</option>
                                 <option value="AMCStubsMemberRewardsEmailOptin">AMCStubsMemberRewardsEmailOptin</option>
                                 <option value="AMCStubsMemberRewardsSummaryEmailOptIn">AMCStubsMemberRewardsSummaryEmailOptIn</option>
                             </select>
+                            <div class="control-label">ENGAGEMENT</div>
+                            <div class="checkbox-item" style="margin-top: 5px;">
+                                <input type="checkbox" id="engagementFilter">
+                                <label for="engagementFilter">Open and Click 6 Months.</label>
+                            </div>
                         </div>
                         <div class="control-group">
-                            <div class="control-label">SUPPRESSION/EXCLUDE</div>
+                            <div class="control-label">SUPPRESSIONS</div>
                             <div class="checkbox-item">
                                 <input type="checkbox" id="AMC_MasterSuppression">
                                 <label for="AMC_MasterSuppression">AMC_MasterSuppression</label>
@@ -951,20 +960,15 @@ select:disabled {
                             </div>
                         </div>                      
                         <div class="control-group">
-                            <div class="control-label">ENGAGEMENT</div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="engagementFilter">
-                                <label for="engagementFilter">Open and Click 6 Months.</label>
-                            </div>
+<!--                            <div class="control-label">ENGAGEMENT</div>-->
                             <div class="checkbox-item" style="margin-top: 5px;">
                                 <input type="checkbox" id="complaintsFilter">
                                 <label for="complaintsFilter">Complaints Removal.</label>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Status Box -->
+                    
+                                    <!-- Status Box -->
                 <div class="status-box">
                     <div class="status-title">
                         <span class="status-indicator"></span>
@@ -994,6 +998,9 @@ select:disabled {
                     </div>
                 </div>
             </div>
+                </div>
+                
+
             
             <!-- Output Column -->
             <div class="output-column">
@@ -1007,7 +1014,7 @@ select:disabled {
                         <button class="tab disabled" data-tab="mep">MEP</button>
                         <button class="tab disabled" data-tab="mpg">MPG</button>
                     </div>
-                    <button class="generate-button" id="generateButton">RESET</button>
+                    
                 </div>
                 
                 <div class="output-container">
@@ -1023,6 +1030,7 @@ select:disabled {
                                 <option value="3">3 (Split to 3 Parts)</option>
                             </select>
                         </div>
+                        <button class="generate-button" id="generateResetButton">RESET</button>
                     </div>
                     
                     <!-- Query Output Container -->

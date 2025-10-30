@@ -45,18 +45,20 @@ function goBackToGenre(){
 }
 function resetAllSettings() {
     // Reset campaign type to default
-    if(actionType !=="campaign"){
-        campaign = "genre";
-        document.getElementById('campaignType').value = 'genre';
-        // Enable Genre selection and tab on reset
-        const genreTab = document.querySelector('.dashboard-tab[data-tab="genreTargeting"]');
-        const genresSelect = document.getElementById('genres');
-        genreTab.classList.remove('disabled');
-        genresSelect.disabled = false;
+//    if(actionType !=="campaign"){
+//        campaign = "genre";
+//        document.getElementById('campaignType').value = 'genre';
+//        // Enable Genre selection and tab on reset
+//        const genreTab = document.querySelector('.dashboard-tab[data-tab="genreTargeting"]');
+//        const genresSelect = document.getElementById('genres');
+//        genreTab.classList.remove('disabled');
+//        genresSelect.disabled = false;
+//    }
+    
+    if(campaign === "genre"){
+        document.getElementById("transactionalField").style.display = "none";
     }
-    
-     document.getElementById("transactionalField").style.display = "none";
-    
+     
     // Reset account types
     document.querySelectorAll('#accountTypes input[type="checkbox"]').forEach(cb => {
         cb.checked = false;
@@ -79,8 +81,10 @@ function resetAllSettings() {
     document.getElementById('joinFieldSubscriber').value = '';
     document.getElementById('sendlistDE').value = '';
     //Reset Split
-    document.getElementById('split').disabled = false; 
-    document.getElementById('split-output').disabled = false; 
+    if(campaign !== "transactional"){
+        document.getElementById('split').disabled = false; 
+        document.getElementById('split-output').disabled = false; 
+    }
     document.getElementById('split').value = 1; 
     document.getElementById('split-output').value = 1;
     // Reset email opt-in
@@ -97,14 +101,14 @@ function resetAllSettings() {
     
     // Reset tabs
     document.querySelectorAll('.dashboard-tab').forEach(tab => {
-        tab.classList.remove('active');
+//        tab.classList.remove('active');
     });
-    document.querySelector('.dashboard-tab[data-tab="accountTypes"]').classList.add('active');
-    
-    document.querySelectorAll('.dashboard-section').forEach(section => {
-        section.classList.remove('active');
-    });
-    document.getElementById('accountTypes').classList.add('active');
+//    document.querySelector('.dashboard-tab[data-tab="accountTypes"]').classList.add('active');
+//    
+//    document.querySelectorAll('.dashboard-section').forEach(section => {
+//        section.classList.remove('active');
+//    });
+//    document.getElementById('accountTypes').classList.add('active');
     
     // Reset query part tabs
     document.querySelectorAll('.query-part-tab').forEach(tab => {
@@ -599,15 +603,15 @@ function displayQuery(tierName, part = 1) {
     // Update label based on whether we have a specific tier or not
     if (tierName) {
         if (config.query.split === "1") {
-            label.textContent = `Query for ${tierName}`;
+            label.textContent = `${tierName}`;
         } else {
-            label.textContent = `Query Part ${part} for ${tierName}`;
+            label.textContent = ` ${tierName} Part ${part}`;
         }
     } else {
         if (config.query.split === "1") {
-            label.textContent = `Query (All Account Types)`;
+            label.textContent = `QUERY RESULTS`;
         } else {
-            label.textContent = `Query Part ${part} (All Account Types)`;
+            label.textContent = `Query Part ${part}`;
         }
     }
 
@@ -1143,7 +1147,7 @@ document.getElementById('campaignType').addEventListener('change', e => {
 });
 
 // Reset button click handler
-document.getElementById('generateButton').addEventListener('click', () => {
+document.getElementById('generateResetButton').addEventListener('click', () => {
     actionType = "";
     resetAllSettings();
 });
