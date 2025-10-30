@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SQL Query Builder</title>
+    
     <!-- Prism.js CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <!-- Prism.js Line Numbers Plugin CSS -->
@@ -899,10 +900,12 @@ select:disabled {
                                 <input type="text" id="devData2" placeholder="e.g., DEV_20251027_MPG_ADH_MOVIE_TITLE_2">
                             </div>
                         </div>
+<!--
                          <div class="dev-data-input" style="padding: 10px 0px 0px 0px;">
                             <div class="control-label">SEGMENT REFERENCE</div>
                             <input type="text" id="segmentReference" placeholder="e.g., 20251027_MPG_ADH_MOVIE_TITLE">
                         </div>                       
+-->
                         <div class="dev-data-input" style="padding: 10px 0px 0px 0px;">
                             <div class="control-label">Additional Fields</div>
                             <input type="text" id="additonalField" placeholder="e.g., s.[NAME]">
@@ -1023,13 +1026,14 @@ select:disabled {
                         <button class="query-part-tab disabled" data-part="1">1</button>
                         <button class="query-part-tab disabled" data-part="2">2</button>
                         <button class="query-part-tab disabled" data-part="3">3</button>
-                        <div class="control-group" style="margin-bottom: -2px; margin-left: -1px;">
+                        <div class="control-group" style="margin-bottom: -2px; margin-left: 2px;">
                             <select id="split-output">
                                 <option value="1">1 (Single Query)</option>
                                 <option value="2">2 (Split to 2 Parts)</option>
                                 <option value="3">3 (Split to 3 Parts)</option>
                             </select>
                         </div>
+                        <input type="text" id="segmentReference" placeholder="REFERENCE DE, e.g., 20251027_MPG_ADH_MOVIE_TITLE" style="width:50%; margin-left: 3px; margin-right: 3px;">
                         <button class="generate-button" id="generateResetButton">RESET</button>
                     </div>
                     

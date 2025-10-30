@@ -99,6 +99,7 @@ function resetAllSettings() {
     document.getElementById('engagementFilter').checked = false;
     document.getElementById('complaintsFilter').checked = false;
     
+    document.getElementById('segmentReference').value = "";
     // Reset tabs
     document.querySelectorAll('.dashboard-tab').forEach(tab => {
 //        tab.classList.remove('active');
@@ -477,6 +478,9 @@ function copyToClipboard(text) {
 
 // Update status function
 function updateStatus() {
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    
     const statusContent = document.getElementById('statusContent');
     let statusHTML = '';
     
@@ -544,8 +548,8 @@ function updateStatus() {
     configText += ')';
     const devData1 = document.getElementById('devData1').value;
     const devData2 = document.getElementById('devData2').value;
-    if (devData1) configText += ', Dev1: ' + devData1;
-    if (devData2) configText += ', Dev2: ' + devData2;
+    if (devData1) configText += ', ' + devData1;
+    if (devData2) configText += ', ' + devData2;
     statusHTML += '<div class="status-value">' + configText + '</div>';
     statusHTML += '</div>';
     
@@ -582,9 +586,20 @@ function updateStatus() {
     statusHTML += '</div>';
     
     statusContent.innerHTML = statusHTML;
+    // Restore scroll position after update
+    window.scrollTo(scrollX, scrollY);
+        // Force scroll position back (use requestAnimationFrame for reliability)
+    requestAnimationFrame(() => {
+        window.scrollTo(scrollX, scrollY);
+    });
 }
 
-// Display query function
+
+function replaceTierCodes(str, newCode) {
+    // Regular expression to match any tier code (MAC, MEA, MEI, MEP, MPG)
+    const tierRegex = /\b(MAC|MEA|MEI|MEP|MPG)\b/g;
+    return str.replace(tierRegex, newCode);
+}
 // Display query function
 function displayQuery(tierName, part = 1) {
     const output = document.getElementById('queryOutput');
@@ -664,6 +679,7 @@ document.querySelectorAll('.dashboard-tab').forEach(tab => {
         this.classList.add('active');
         const tabId = this.getAttribute('data-tab');
         document.getElementById(tabId).classList.add('active');
+        
     });
 });
 
@@ -722,7 +738,44 @@ document.querySelectorAll('#accountTypes input[type="checkbox"]').forEach(cb => 
     });
 });
 
+//const debugVal = "DEV_20251027_MPG_ADH_THE_RUNNING_MAN_SWEEPS";
 // Tab switching for account types
+function updateSegmentReferenceTier(){
+    let debugVal0 = config.query.dev1;
+    debugVal0 = debugVal0.substring(4);
+    let debugVal1 = config.query.dev1;
+    let debugVal2 = config.query.dev2;
+    
+    let newDebugVal1 = debugVal0;
+    let newDebugVal2 = debugVal1;
+    let newDebugVal3 = debugVal2;
+    
+    const tierUpper = "";
+    if(activeTier){
+        let tierUpper = activeTier.toUpperCase();
+   
+        const possibleTiers = ["MAC", "MEA", "MEP", "MEI", "MPG"];
+        const tierRegex = new RegExp(possibleTiers.join('|'));
+        newDebugVal1 = debugVal0.replace(tierRegex, tierUpper);
+        newDebugVal2 = debugVal1.replace(tierRegex, tierUpper);
+        newDebugVal3 = debugVal2.replace(tierRegex, tierUpper);
+//        console.log(activeQueryPart, tierUpper);
+     }
+    
+    if(activeQueryPart === 1){
+        document.getElementById("segmentReference").value = newDebugVal1;
+    }else if(activeQueryPart === 2){
+        document.getElementById("segmentReference").value = newDebugVal2;
+    }else if(activeQueryPart === 3){
+        document.getElementById("segmentReference").value = newDebugVal3;
+    }
+    
+    document.getElementById("devData1").value = newDebugVal2;
+    document.getElementById("devData2").value = newDebugVal3;
+    
+//    console.log(newDebugVal);
+//    console.log(config);
+}
 document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', function() {
         if (this.classList.contains('disabled')) return;
@@ -732,11 +785,31 @@ document.querySelectorAll('.tab').forEach(tab => {
         
         // Add active class to clicked tab
         this.classList.add('active');
-        
         // Update active tier
         const tierId = this.getAttribute('data-tab');
         activeTier = tierId;
-        
+
+        updateSegmentReferenceTier();
+//        const debugVal = config.query.dev1;
+//        const tierUpper = activeTier.toUpperCase();
+//        const possibleTiers = ["MAC", "MEA", "MEP", "MEI", "MPG"];
+//        const tierRegex = new RegExp(possibleTiers.join('|'));
+//        let newDebugVal = debugVal.replace(tierRegex, tierUpper);
+//        console.log(activeQueryPart);
+//        if(activeQueryPart === 1){
+//                if (newDebugVal.startsWith('DEV_')) {
+//                // The substring(4) method returns a new string starting from the 5th character
+//                // (index 4), effectively removing the first 4 characters ("DEV_").
+//                newDebugVal = newDebugVal.substring(4);
+//            }
+//        }
+//        document.getElementById("segmentReference").value = newDebugVal;
+//        document.getElementById("devData1").value = newDebugVal;
+//        document.getElementById("devData2").value = newDebugVal;
+//
+//        console.log(newDebugVal);
+//        console.log(config);
+        // Ensure activeTier is a valid string before replacing
         // Display query for the selected tier
         const tierCheckbox = document.getElementById(tierId);
         if (tierCheckbox) {
@@ -759,9 +832,13 @@ document.querySelectorAll('.query-part-tab').forEach(tab => {
         // Update active query part
         activeQueryPart = parseInt(this.getAttribute('data-part'));
         
+        
+        
         // Display the selected part
+         updateSegmentReferenceTier();
         if (activeTier) {
             const activeCheckbox = document.getElementById(activeTier);
+           
             displayQuery(activeCheckbox.dataset.tierName, activeQueryPart);
         } else {
             displayQuery(null, activeQueryPart);
@@ -1152,6 +1229,38 @@ document.getElementById('generateResetButton').addEventListener('click', () => {
     resetAllSettings();
 });
 
+function updateSegments(){
+        // Get the segment reference input element
+    const segmentReference = document.getElementById('segmentReference');
+    
+    // Get the dev data input elements
+    const devData1 = document.getElementById('devData1');
+    const devData2 = document.getElementById('devData2');
+    const segmentRef = document.getElementById('segmentReference');
+    
+    // Add event listener for input changes
+    segmentReference.addEventListener('input', function() {
+        // Get the value from segmentReference
+        let segmentValue = this.value;
+        
+        // Check if the value starts with "DEV_" and remove it if it does
+        if (segmentValue.startsWith('DEV_')) {
+            segmentValue = segmentValue.substring(4); // Remove the first 4 characters "DEV_"
+        }
+        
+        // Update devData1 with DEV_ prefix
+        devData1.value = 'DEV_' + segmentValue;
+        
+        // Update devData2 with DEV_ prefix and _2 suffix
+        devData2.value = 'DEV_' + segmentValue + '_2';
+        config.query.dev1 = devData1.value;
+        config.query.dev2 = devData2.value;
+        updateStatus();
+        displayQuery(null, activeQueryPart);
+        console.log(config);
+    });
+}
+
 // Initialize status on load
 updateStatus();
 
@@ -1160,6 +1269,7 @@ displayQuery(null, 1);
 
 // Initialize query part tabs
 updateQueryPartTabs();
+updateSegments();
 
 // Make entire checkbox-item divs clickable
 document.querySelectorAll('.checkbox-item').forEach(item => {
