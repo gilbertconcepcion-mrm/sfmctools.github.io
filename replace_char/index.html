@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Character Replacer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .textarea-container {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        #replaceBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #replaceBtn:hover {
+            background-color: #45a049;
+        }
+        #copyBtn, #copyOutputBtn {
+            background-color: #2196F3;
+            color: white;
+        }
+        #copyBtn:hover, #copyOutputBtn:hover {
+            background-color: #0b7dda;
+        }
+        #backBtn {
+            background-color: #FF9800;
+            color: white;
+        }
+        #backBtn:hover {
+            background-color: #e68900;
+        }
+        .notification {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .options {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .option {
+            margin-bottom: 8px;
+        }
+        label {
+            margin-right: 10px;
+        }
+        input[type="text"] {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .option-group {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .option-group h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text Character Replacer</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('input')">Input</div>
+            <div class="tab" onclick="switchTab('output')">Output</div>
+            <div class="tab" onclick="switchTab('options')">Options</div>
+        </div>
+        
+        <div id="input-tab" class="tab-content active">
+            <div class="textarea-container">
+                <textarea id="inputText" placeholder="Paste your text here..."></textarea>
+            </div>
+            <div class="button-container">
+                <button id="replaceBtn">Replace Characters</button>
+                <button id="copyBtn">Copy Output</button>
+            </div>
+            <div id="notification" class="notification"></div>
+        </div>
+        
+        <div id="output-tab" class="tab-content">
+            <div class="textarea-container">
+                <textarea id="outputText" readonly placeholder="Replaced text will appear here..."></textarea>
+            </div>
+            <div class="button-container">
+                <button id="backBtn">Back to Input</button>
+                <button id="copyOutputBtn">Copy Output</button>
+            </div>
+        </div>
+        
+        <div id="options-tab" class="tab-content">
+            <div class="option-group">
+                <h3>Character Replacement Options</h3>
+                <div class="option">
+                    <label for="isReplaceChars">Enable Character Replacement:</label>
+                    <input type="checkbox" id="isReplaceChars" checked>
+                </div>
+                <div class="option">
+                    <label for="hyphenVal">Hyphen Replacement Value:</label>
+                    <input type="text" id="hyphenVal" value="&shy;">
+                </div>
+                <div class="option">
+                    <label for="commaVal">Comma Replacement Value:</label>
+                    <input type="text" id="commaVal" value=",">
+                </div>
+            </div>
+            
+            <div class="option-group">
+                <h3>Link Replacement Options</h3>
+                <div class="option">
+                    <label for="isReplaceLinks">Enable Link Replacement:</label>
+                    <input type="checkbox" id="isReplaceLinks" checked>
+                </div>
+                <div class="option">
+                    <label for="aliasPrefix">Alias Prefix:</label>
+                    <input type="text" id="aliasPrefix" value="XX_00">
+                </div>
+                <div class="option">
+                    <label for="currentHeader">Current Header:</label>
+                    <input type="text" id="currentHeader" value="DisclaimerText">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Define constants
+        const regTag = `<sup style="vertical-align: top; font-size: 80%; line-height: 120%; mso-ansi-font-size:90%;">&#174;</sup>`;
+        const tmTag = `&#8482;`;
+        const tag2 = `?utm_medium=email&utm_source=%%__AdditionalEmailAttribute1%%&utm_campaign=%%__AdditionalEmailAttribute2%%&utm_content=%%=format(xtshortdate,"yyyyMMdd")=%%_j%%jobid%%_%%=iif(empty(@dst_segmentKey),concat("u",subscriberid),concat("e",@dst_segmentKey))=%%_d8l&utm_term=%%LoyaltyAccountType%%&dst=%%=v(@dst_degSendID)=%%&utm_launch=%%=Format(xtshortdate,"yyyy-MM-dd")=%%&member-id=%%SubscriberProfileGUID%%" target="_blank" style="text-decoration: underline; color: #00aef1; font-weight:normal;">`;
+
+        const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+        const cleanUp = (text) => {
+            // Get options from the UI
+            const isReplaceChars = document.getElementById('isReplaceChars').checked;
+            const hyphenVal = document.getElementById('hyphenVal').value || "&shy;";
+            const commaVal = document.getElementById('commaVal').value || ",";
+            
+            // Link replacement options
+            const isReplaceLinks = document.getElementById('isReplaceLinks').checked;
+            const aliasPrefix = document.getElementById('aliasPrefix').value || "XX_00";
+            const currentHeader = document.getElementById('currentHeader').value || "DisclaimerText";
+            
+            if (!text) return "";
+            
+            // Link replacement constants
+            const tag1 = `<span style="display: inline-block;"><a alias="`;
+            const tag1Close = `" href="`;
+            const tag3 = `</a>`;
+            const tag4 = `</span>`;
+            
+            // URL pattern
+            const urlPattern = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:\d+)?(\/[^\s]*)?/gi;
+            const tag2Pattern = new RegExp(`<a[^>]*${escapeRegExp(tag2)}[^>]*>[\\s\\S]*?<\\/a>`, "gi");
+
+            // PROTECTION PHASE - Protect ALL HTML elements before any replacements
+            let spanBlocks = [];
+            let allLinkBlocks = [];
+            let tag2Blocks = [];
+
+            // Protect ALL <span> tags
+            text = text.replace(/<span[\s\S]*?<\/span>/gi, (match) => {
+                spanBlocks.push(match);
+                return `__SPAN_PLACEHOLDER_${spanBlocks.length - 1}__`;
+            });
+
+            // Protect ALL <a> tags
+            text = text.replace(/<a[\s\S]*?<\/a>/gi, (match) => {
+                // Check if this is a tag2 link
+                if (tag2Pattern.test(match)) {
+                    tag2Blocks.push(match);
+                    return `__TAG2_PLACEHOLDER_${tag2Blocks.length - 1}__`;
+                } else {
+                    allLinkBlocks.push(match);
+                    return `__ALL_LINK_PLACEHOLDER_${allLinkBlocks.length - 1}__`;
+                }
+            });
+
+            // LINK REPLACEMENT PHASE - Only work on unprotected text
+            if (isReplaceLinks && currentHeader === "DisclaimerText") {
+                const matches = text.match(urlPattern);
+                if (matches && matches.length > 0) {
+                    for (let i = 0; i < matches.length; i++) {
+                        let link = matches[i].replace(/&#44;/g, ",").replace(/&#45;/g, "-");
+
+                        // Check for trailing punctuation
+                        let trailChar = "";
+                        const matchTrail = link.match(/[.,]$/);
+                        if (matchTrail) {
+                            trailChar = matchTrail[0];
+                        }
+
+                        // Remove trailing punctuation before wrapping
+                        link = link.replace(/[.,]$/, "");
+
+                        const aliasName = aliasPrefix + "_legal";
+                        const processedLink =
+                            tag1 +
+                            aliasName +
+                            tag1Close +
+                            "https://" +
+                            link +
+                            tag2 +
+                            link +
+                            tag3 +
+                            trailChar +
+                            tag4;
+
+                        // Safe regex to replace only this exact link
+                        const linkSafe = matches[i].replace(
+                            /[.*+?^${}()|[\]\\]/g,
+                            "\\$&"
+                        );
+                        const replaceRegex = new RegExp(linkSafe, "g");
+
+                        text = text.replace(replaceRegex, processedLink);
+                    }
+                }
+            }
+
+            // CHARACTER REPLACEMENT PHASE - Only on unprotected text
+            if (isReplaceChars) {
+                text = text
+                    .replace(/&(?!#?\w+;)/g, "&amp;")
+                    .replace(/©/g, "&copy;")
+                    .replace(/&copy;/g, "&#169;")
+                    .replace(/Coca[- ]Cola/g, "Coca&#8209;Cola")
+                    .replace(/A-List/g, "A&#8209;List")
+                    .replace(/A-list/g, "A&#8209;list")
+                    .replace(/Mix-in/g, "Mix&#8209;in")
+                    .replace(/Mix-In/g, "Mix&#8209;in")
+                    .replace(/&#nb;/g, "&#8209;")
+                    .replace(/&nb;/g, "&#8209;")
+                    .replace(/–/g, "&ndash;")
+                    .replace(/-/g, hyphenVal)
+                    .replace(/—/g, "&mdash;")
+                    // Use a more targeted approach for quotes - only replace quotes in text content
+                    // This regex finds quotes that are not inside HTML tags
+                    .replace(/(^|[^<])"([^>]*$)/g, "$1&ldquo;$2")
+                    .replace(/(^|[^<])"([^>]*$)/g, "$1&rdquo;$2")
+                    .replace(/á/g, "&aacute;").replace(/é/g, "&eacute;").replace(/í/g, "&iacute;")
+                    .replace(/ó/g, "&oacute;").replace(/ú/g, "&uacute;")
+                    .replace(/Á/g, "&Aacute;").replace(/É/g, "&Eacute;").replace(/Í/g, "&Iacute;")
+                    .replace(/Ó/g, "&Oacute;").replace(/Ú/g, "&Uacute;")
+                    .replace(/à/g, "&agrave;").replace(/è/g, "&egrave;").replace(/ì/g, "&igrave;")
+                    .replace(/ò/g, "&ograve;").replace(/ù/g, "&ugrave;")
+                    .replace(/À/g, "&Agrave;").replace(/È/g, "&Egrave;").replace(/Ì/g, "&Igrave;")
+                    .replace(/Ò/g, "&Ograve;").replace(/Ù/g, "&Ugrave;")
+                    .replace(/â/g, "&acirc;").replace(/ê/g, "&ecirc;").replace(/î/g, "&icirc;")
+                    .replace(/ô/g, "&ocirc;").replace(/û/g, "&ucirc;")
+                    .replace(/Â/g, "&Acirc;").replace(/Ê/g, "&Ecirc;").replace(/Î/g, "&Icirc;")
+                    .replace(/Ô/g, "&Ocirc;").replace(/Û/g, "&Ucirc;")
+                    .replace(/ñ/g, "&ntilde;").replace(/Ñ/g, "&Ntilde;")
+                    .replace(/…/g, "&hellip;").replace(/°/g, "&deg;").replace(/‰/g, "&permil;")
+                    .replace(/§/g, "&sect;").replace(/†/g, "&dagger;").replace(/‡/g, "&Dagger;")
+                    .replace(/®/g, regTag).replace(/™/g, tmTag).replace(/℠/g, "&sm;")
+                    .replace(/&trade;/g, tmTag)
+                    .replace(/¶/g, "&para;").replace(/'/g, "&#39;").replace(/,/g, commaVal);
+            }
+
+            // RESTORATION PHASE - Restore all protected elements in reverse order
+            // Restore ALL <a> blocks (non-tag2)
+            text = text.replace(
+                /__ALL_LINK_PLACEHOLDER_(\d+)__/g,
+                (_, idx) => allLinkBlocks[parseInt(idx)]
+            );
+
+            // Restore tag2 <a> blocks
+            text = text.replace(
+                /__TAG2_PLACEHOLDER_(\d+)__/g,
+                (_, idx) => tag2Blocks[parseInt(idx)]
+            );
+
+            // Restore <span> blocks
+            text = text.replace(
+                /__SPAN_PLACEHOLDER_(\d+)__/g,
+                (_, idx) => spanBlocks[parseInt(idx)]
+            );
+
+            return text;
+        };
+
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Add active class to clicked tab
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // If called programmatically, find the correct tab
+                document.querySelector(`.tab:nth-child(${tabName === 'input' ? 1 : tabName === 'output' ? 2 : 3})`).classList.add('active');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, isSuccess = true) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Replace button functionality
+        document.getElementById('replaceBtn').addEventListener('click', function() {
+            const inputText = document.getElementById('inputText').value;
+            const outputText = cleanUp(inputText);
+            document.getElementById('outputText').value = outputText;
+            
+            // Switch to output tab
+            switchTab('output');
+            
+            showNotification('Text has been replaced successfully!');
+        });
+
+        // Back button functionality
+        document.getElementById('backBtn').addEventListener('click', function() {
+            switchTab('input');
+        });
+
+        // Copy button functionality (from input tab)
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const outputText = document.getElementById('outputText').value;
+            
+            if (!outputText) {
+                showNotification('No text to copy. Please replace text first.', false);
+                return;
+            }
+            
+            navigator.clipboard.writeText(outputText).then(() => {
+                showNotification('Text copied to clipboard!');
+            }).catch(err => {
+                showNotification('Failed to copy text: ' + err, false);
+            });
+        });
+
+        // Copy button functionality (from output tab)
+        document.getElementById('copyOutputBtn').addEventListener('click', function() {
+            const outputText = document.getElementById('outputText').value;
+            
+            if (!outputText) {
+                showNotification('No text to copy. Please replace text first.', false);
+                return;
+            }
+            
+            navigator.clipboard.writeText(outputText).then(() => {
+                showNotification('Text copied to clipboard!');
+            }).catch(err => {
+                showNotification('Failed to copy text: ' + err, false);
+            });
+        });
+    </script>
+</body>
+</html>
