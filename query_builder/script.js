@@ -1,5 +1,5 @@
 // Update config object
-config = {
+let config = {
     tier: {
         mac: { key1: "A-List Classic", key2: "MAC", checked: "" },
         mea: { key1: "A-List", key2: "MEA", checked: "" },
@@ -9,15 +9,34 @@ config = {
     },
     genre: "NONE",
     member: { membership: "Member", activeStatus: "Active", age: "13" },
-    query: { split: "1", dev1: "", dev2: "", sendlist: "", additionalFields: "",sendlistDataField: "EmailAddress",joinFieldSubscriber: "EmailAddress" },
+    query: { split: "1", dev1: "DEV1_PLACEHOLDER", dev2: "DEV2_PLACEHOLDER", sendlist: "PLACEHOLDER_Sendlist", additionalFields: "",sendlistDataField: "EmailAddress",joinFieldSubscriber: "EmailAddress" },
     optIn: "",
-    amcMasterSupression: "",
-    associateSupression: "",
+    amcMasterSuppression: "",
+    associateSuppression: "",
     freshAddressExclude: "",
     engagement: "",
     complaintsRemoval: ""
 };
-
+function resetConfig(){
+    config = {
+    tier: {
+        mac: { key1: "A-List Classic", key2: "MAC", checked: "" },
+        mea: { key1: "A-List", key2: "MEA", checked: "" },
+        mei: { key1: "Insider", key2: "MEI", checked: "" },
+        mep: { key1: "Premiere", key2: "MEP", checked: "" },
+        mpg: { key1: "PremiereGo", key2: "MPG", checked: "" }
+    },
+    genre: "NONE",
+    member: { membership: "Member", activeStatus: "Active", age: "13" },
+    query: { split: "1", dev1: "DEV1_PLACEHOLDER", dev2: "DEV2_PLACEHOLDER", sendlist: "PLACEHOLDER_Sendlist", additionalFields: "",sendlistDataField: "EmailAddress",joinFieldSubscriber: "EmailAddress" },
+    optIn: "",
+    amcMasterSuppression: "",
+    associateSuppression: "",
+    freshAddressExclude: "",
+    engagement: "",
+    complaintsRemoval: ""
+};
+}
 let currentTiers = []; // Array of selected tiers
 let activeTier = null; // The currently displayed tier (can be null)
 let activeQueryPart = 1; // The currently displayed query part (1, 2, or 3)
@@ -132,24 +151,7 @@ function resetAllSettings() {
     activeQueryPart = 1;
     
     // Update config object
-    config = {
-        tier: {
-            mac: { key1: "A-List Classic", key2: "MAC", checked: "" },
-            mea: { key1: "A-List", key2: "MEA", checked: "" },
-            mei: { key1: "Insider", key2: "MEI", checked: "" },
-            mep: { key1: "Premiere", key2: "MEP", checked: "" },
-            mpg: { key1: "PremiereGo", key2: "MPG", checked: "" }
-        },
-        genre: "NONE",
-        member: { membership: "Member", activeStatus: "Active", age: "13" },
-        query: { split: "1", dev1: "", dev2: "", sendlist: "", additionalFields: "", sendlistDataField: "EmailAddress", joinFieldSubscriber: "EmailAddress" },
-        optIn: "",
-        amcMasterSupression: "",
-        associateSupression: "",
-        freshAddressExclude: "",
-        engagement: "",
-        complaintsRemoval: ""
-    };
+    resetConfig();
     
     // Hide dev data inputs
     document.getElementById('devDataInputs').classList.remove('active');
@@ -202,7 +204,7 @@ function generateQuerySendlist(config, tierName) {
             qsl = `INNER JOIN [${config.query.sendlist}] al ON al.[${sDField}] = s.[${joinField}]`;
         }
     }
-    
+    qsl = `INNER JOIN [${config.query.sendlist}] al ON al.[${sDField}] = s.[${joinField}]`;
     // WHERE clause
     const qw = `WHERE 1=1`;
     
@@ -254,12 +256,12 @@ function generateQuerySendlist(config, tierName) {
         : ``;
     
     // AMC Master Suppression
-    const qams = config.amcMasterSupression === "Y" 
+    const qams = config.amcMasterSuppression === "Y" 
         ? `AND NOT EXISTS(SELECT 1 FROM [AMC_MasterSuppression] cpesl WITH (NOLOCK) WHERE s.EmailAddress = cpesl.EmailAddress)` 
         : ``;
     
     // Associate Suppression - using COALESCE for NULL handling
-    const qasup = config.associateSupression === "Y" 
+    const qasup = config.associateSuppression === "Y" 
         ? `AND COALESCE(s.AMCStubsCardNumber,0) NOT LIKE '1104%' AND COALESCE(s.AMCStubsCardNumber,0) NOT LIKE '11094%'` 
         : ``;
     
@@ -335,9 +337,12 @@ function generateQuery(config, tierName) {
     const qs1 = `FROM [AMC_Subscribers] AS s WITH (NOLOCK)`;
     const qg1 = ccampaign === 'genre' && config.genre && config.genre !== "NONE" ? `INNER JOIN [AMC_Genre_targeting] al ON al.LOYALTYACCOUNTID = s.AMCStubsKobieAccountID` : ``;
     let qsl = ``;
-    if (config.query.sendlist && config.query.sendlist.trim() !== "") {
-        qsl = `INNER JOIN [${config.query.sendlist}] al ON al.[EmailAddress] = s.[EmailAddress]`;
+    if(ccampaign === "sendlist"){
+        if (config.query.sendlist && config.query.sendlist.trim() !== "") {
+            qsl = `INNER JOIN [${config.query.sendlist}] al ON al.[EmailAddress] = s.[EmailAddress]`;
+        }
     }
+
     if(ccampaign === "transactional"){
         qsl = `INNER JOIN [${config.query.sendlist}] al ON al.[${sDField}] = s.[${joinField}]`;
     }
@@ -358,8 +363,8 @@ function generateQuery(config, tierName) {
     }
     const qas = config.member.activeStatus === "Active" ? `AND EXISTS (SELECT 1 FROM All_Subscribers_Status_Staging AS sub WITH (NOLOCK) WHERE s.EmailAddress = sub.SubscriberKey AND sub.Status = 'Active')` : ``;
     const qc = config.complaintsRemoval === "Y" ? `AND NOT EXISTS (SELECT 1 FROM _Complaint AS com WITH (NOLOCK) WHERE s.EmailAddress = com.SubscriberKey)` : ``;
-    const qams = config.amcMasterSupression === "Y" ? `AND NOT EXISTS(SELECT 1 FROM [AMC_MasterSuppression] AS cpesl WITH (NOLOCK) WHERE s.EmailAddress = cpesl.EmailAddress)` : ``;
-    const qasup = config.associateSupression === "Y" ? `AND s.amcStubsCardNumber IS NOT NULL AND s.amcStubsCardNumber NOT LIKE '1104%' AND s.amcStubsCardNumber NOT LIKE '11094%'` : ``;
+    const qams = config.amcMasterSuppression === "Y" ? `AND NOT EXISTS(SELECT 1 FROM [AMC_MasterSuppression] AS cpesl WITH (NOLOCK) WHERE s.EmailAddress = cpesl.EmailAddress)` : ``;
+    const qasup = config.associateSuppression === "Y" ? `AND s.amcStubsCardNumber IS NOT NULL AND s.amcStubsCardNumber NOT LIKE '1104%' AND s.amcStubsCardNumber NOT LIKE '11094%'` : ``;
     const qfa = config.freshAddressExclude === "Y" ? `AND NOT EXISTS ( SELECT 1 FROM FreshAddress_Exclusions_MRM AS f WITH (NOLOCK) WHERE s.EmailAddress = f.EmailAddress)` : ``;
     const qe = config.engagement === "Y" ? `AND (EXISTS (SELECT 1 FROM CLICK_ENGAGEMENT_LAST_6_MONTHS AS c WITH (NOLOCK) WHERE s.EmailAddress = c.SubscriberKey) OR EXISTS (SELECT 1 FROM LastOpen_6Months AS o WITH (NOLOCK) WHERE s.EmailAddress = o.EmailAddress))` : ``;
 
@@ -446,10 +451,10 @@ function generateQueryTransactional(config, tierName) {
     const qc = config.complaintsRemoval === "Y" ? `AND NOT EXISTS(SELECT 1 FROM _Complaint c WITH(NOLOCK) WHERE c.SubscriberKey = s.EmailAddress)` : ``;
     
     // AMC master suppression condition - updated to match the template
-    const qams = config.amcMasterSupression === "Y" ? `AND NOT EXISTS(SELECT 1 FROM [AMC_MasterSuppression] m WITH(NOLOCK) WHERE m.EmailAddress = s.EmailAddress)` : ``;
+    const qams = config.amcMasterSuppression === "Y" ? `AND NOT EXISTS(SELECT 1 FROM [AMC_MasterSuppression] m WITH(NOLOCK) WHERE m.EmailAddress = s.EmailAddress)` : ``;
     
     // Associate suppression condition - updated to match the template
-    const qasup = config.associateSupression === "Y" ? `AND COALESCE(s.AMCStubsCardNumber, '') NOT LIKE '1104%' AND COALESCE(s.AMCStubsCardNumber, '') NOT LIKE '11094%'` : ``;
+    const qasup = config.associateSuppression === "Y" ? `AND COALESCE(s.AMCStubsCardNumber, '') NOT LIKE '1104%' AND COALESCE(s.AMCStubsCardNumber, '') NOT LIKE '11094%'` : ``;
     
     // Fresh address exclusion condition - updated to match the template
     const qfa = config.freshAddressExclude === "Y" ? `AND NOT EXISTS(SELECT 1 FROM FreshAddress_Exclusions_MRM f WITH(NOLOCK) WHERE f.EmailAddress = s.EmailAddress)` : ``;
@@ -644,11 +649,13 @@ function displayQuery(tierName, part = 1) {
         }
     }
 
+
     // Display only the requested part and set up copy button
     if (config.query.split === "1") {
         output.innerHTML = `<pre><code class="language-sql">${escapeHtml(generatedQueries.full)}</code></pre>`;
         btn.style.display = 'block';
         btn.onclick = () => copyToClipboard(generatedQueries.full);
+        updateQueryOutput(generatedQueries.full);
     } else if (config.query.split === "2") {
         let currentQuery;
         if (part === 1) {
@@ -661,6 +668,7 @@ function displayQuery(tierName, part = 1) {
         btn.style.display = 'block';
         // Copy only the currently visible part
         btn.onclick = () => copyToClipboard(currentQuery);
+        updateQueryOutput(currentQuery);
     } else if (config.query.split === "3") {
         let currentQuery;
         if (part === 1) {
@@ -673,10 +681,15 @@ function displayQuery(tierName, part = 1) {
             currentQuery = generatedQueries.part3;
             output.innerHTML = `<pre><code class="language-sql">${escapeHtml(currentQuery)}</code></pre>`;
         }
+        
+        updateQueryOutput(currentQuery);
         btn.style.display = 'block';
         // Copy only the currently visible part
         btn.onclick = () => copyToClipboard(currentQuery);
     }
+    customConfig.devData1 = config.query.dev1;
+    customConfig.devData2 = config.query.dev2;
+    customConfig.sendList = config.query.sendlist;
     
     // Re-highlight the code
     Prism.highlightAll();
@@ -796,6 +809,11 @@ function updateSegmentReferenceTier(){
     
     document.getElementById("devData1").value = newDebugVal2;
     document.getElementById("devData2").value = newDebugVal3;
+    
+    
+    customConfig.devData1 = newDebugVal2;
+    customConfig.devData2 = newDebugVal3;
+//    customConfig.sendList = config.query.sendlist;
     
 //    console.log(newDebugVal);
 //    console.log(config);
@@ -1022,6 +1040,7 @@ document.getElementById('devData2').addEventListener('input', e => {
 
 document.getElementById('sendlistDE').addEventListener('input', e => {
     config.query.sendlist = e.target.value;
+    
     if (activeTier) {
         const activeCheckbox = document.getElementById(activeTier);
         displayQuery(activeCheckbox.dataset.tierName, activeQueryPart);
@@ -1138,7 +1157,7 @@ document.getElementById('emailOptIn').addEventListener('change', e => {
 });
 
 document.getElementById('AMC_MasterSuppression').addEventListener('change', e => {
-    config.amcMasterSupression = e.target.checked ? 'Y' : '';
+    config.amcMasterSuppression = e.target.checked ? 'Y' : '';
     if (activeTier) {
         const activeCheckbox = document.getElementById(activeTier);
         displayQuery(activeCheckbox.dataset.tierName, activeQueryPart);
@@ -1149,7 +1168,7 @@ document.getElementById('AMC_MasterSuppression').addEventListener('change', e =>
 });
 
 document.getElementById('Associate_Suppression').addEventListener('change', e => {
-    config.associateSupression = e.target.checked ? 'Y' : '';
+    config.associateSuppression = e.target.checked ? 'Y' : '';
     if (activeTier) {
         const activeCheckbox = document.getElementById(activeTier);
         displayQuery(activeCheckbox.dataset.tierName, activeQueryPart);

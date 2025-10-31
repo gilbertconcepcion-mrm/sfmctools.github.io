@@ -605,6 +605,14 @@ select:focus, input[type="text"]:focus {
     color: #e06c75;
 }
 
+/* Custom highlighting for config values */
+.query-output .token.config-highlight {
+    background-color: #000000;
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0 2px;
+}
 /* Copy Button */
 .copy-button {
     margin-top: 10px;
@@ -764,7 +772,7 @@ select:disabled {
 <body>
     <div class="container">
         <div class="header">
-            <h2>Query Builder V.01</h2>
+            <h2>Query Builder Genre | Sendlist | Transactional</h2>
         </div>
         
         <div class="content-wrapper">
@@ -1060,8 +1068,8 @@ select:disabled {
     <!-- Prism.js Line Numbers Plugin -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
     
-    <script src="script.js">
- // Configuration object
-    </script>
+    <script src="prismHighlighter.js"></script>
+    <script src="script.js"></script>
+    
 </body>
 </html>
