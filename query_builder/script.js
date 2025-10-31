@@ -10,7 +10,7 @@ config = {
     genre: "NONE",
     member: { membership: "Member", activeStatus: "Active", age: "13" },
     query: { split: "1", dev1: "", dev2: "", sendlist: "", additionalFields: "",sendlistDataField: "EmailAddress",joinFieldSubscriber: "EmailAddress" },
-    optIn: "None Selected",
+    optIn: "",
     amcMasterSupression: "",
     associateSupression: "",
     freshAddressExclude: "",
@@ -24,6 +24,8 @@ let activeQueryPart = 1; // The currently displayed query part (1, 2, or 3)
 let generatedQueries = null; // Store the generated queries
 let actionType = "";
 let campaign = "genre";
+
+resetAllSettings();
 
 // Show notification function
 function showNotification(message, type = 'success') {
@@ -100,6 +102,7 @@ function resetAllSettings() {
     document.getElementById('complaintsFilter').checked = false;
     
     document.getElementById('segmentReference').value = "";
+    document.getElementById('segmentReference').disabled = true;
     // Reset tabs
     document.querySelectorAll('.dashboard-tab').forEach(tab => {
 //        tab.classList.remove('active');
@@ -140,7 +143,7 @@ function resetAllSettings() {
         genre: "NONE",
         member: { membership: "Member", activeStatus: "Active", age: "13" },
         query: { split: "1", dev1: "", dev2: "", sendlist: "", additionalFields: "", sendlistDataField: "EmailAddress", joinFieldSubscriber: "EmailAddress" },
-        optIn: "None Selected",
+        optIn: "",
         amcMasterSupression: "",
         associateSupression: "",
         freshAddressExclude: "",
@@ -474,10 +477,14 @@ function copyToClipboard(text) {
     }).catch(err => {
         showNotification('Failed to copy query', 'error');
     });
+    
 }
 function copyToClipboard_DE_Name(text) {
     navigator.clipboard.writeText(text).then(() => {
-        showNotification('Data Extension Name Copied');
+        if(text!==''){
+            showNotification('Data Extension Name Copied');
+        }
+        
     }).catch(err => {
         showNotification('Faield to copy DE name', 'error');
     });
@@ -905,6 +912,22 @@ function updateQueryPartTabs() {
 
 // Event listeners for form controls
 //SPLIT CHANGE
+function activateSegmentReference(val){
+    let valInt = parseInt(val);
+    console.log(valInt);
+    if(valInt > 1){
+        document.getElementById('segmentReference').disabled = false;
+        document.getElementById('segmentReference').classList.remove('disabled');
+        document.getElementById('segmentReference').classList.add('active');         
+    }else{
+        document.getElementById('segmentReference').value = "";
+        document.getElementById('devData1').value = "";
+        document.getElementById('devData2').value = "";
+        document.getElementById('segmentReference').disabled = true;
+        document.getElementById('segmentReference').classList.remove('active');
+        document.getElementById('segmentReference').classList.add('disabled');  
+    }
+}
 document.getElementById('split').addEventListener('change', e => {
     config.query.split = e.target.value;
     document.getElementById('split-output').value = e.target.value;
@@ -917,6 +940,7 @@ document.getElementById('split').addEventListener('change', e => {
     } else if (e.target.value === "2") {
         devDataInputs.classList.add('active');
         devData2.style.display = 'none'; // Hide DEV data source 2
+
     } else if (e.target.value === "3") {
         devDataInputs.classList.add('active');
         devData2.style.display = 'block'; // Show DEV data source 2
@@ -930,6 +954,8 @@ document.getElementById('split').addEventListener('change', e => {
         displayQuery(null, activeQueryPart);
     }
     updateStatus();
+    activateSegmentReference(e.target.value);
+
 });
 
 document.getElementById('split-output').addEventListener('change', e => {
@@ -961,9 +987,6 @@ document.getElementById('split-output').addEventListener('change', e => {
         devData2.style.display = 'block'; // Show DEV data source 2
     }
     
-    
-    
-    
     updateQueryPartTabs();
     if (activeTier) {
         const activeCheckbox = document.getElementById(activeTier);
@@ -972,6 +995,7 @@ document.getElementById('split-output').addEventListener('change', e => {
         displayQuery(null, activeQueryPart);
     }
     updateStatus();
+    activateSegmentReference(e.target.value);
 });
 
 document.getElementById('devData1').addEventListener('input', e => {
