@@ -36,6 +36,10 @@ function resetConfig(){
     engagement: "",
     complaintsRemoval: ""
 };
+    
+    if(campaign === "genre"){
+        config.query.sendlist = "";
+    }
 }
 let currentTiers = []; // Array of selected tiers
 let activeTier = null; // The currently displayed tier (can be null)
@@ -101,6 +105,9 @@ function resetAllSettings() {
     document.getElementById('sendlistDataField').value = '';
     document.getElementById('joinFieldSubscriber').value = '';
     document.getElementById('sendlistDE').value = '';
+    if(campaign === "genre"){
+        document.getElementById('sendlistDE').parentElement.style.display = "none";
+    }
     //Reset Split
     if(campaign !== "transactional"){
         document.getElementById('split').disabled = false; 
