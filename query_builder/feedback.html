@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In-Browser Feedback</title>
+    
+    <!-- 1. Include the sql.js library from a CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 2em;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2em;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 2em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1em;
+        }
+        h1, h2 {
+            color: #0056b3;
+        }
+        form section {
+            margin-bottom: 1.5em;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5em;
+        }
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0.8em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            resize: vertical;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 0.9em;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 1em;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+        #status-message {
+            margin-top: 1em;
+            padding: 1em;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        #feedback-list {
+            margin-top: 2em;
+            list-style-type: none;
+            padding: 0;
+        }
+        #feedback-list li {
+            background-color: #e9ecef;
+            padding: 1em;
+            border-radius: 4px;
+            margin-bottom: 0.5em;
+        }
+        #feedback-list li strong {
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+        <header>
+            <h1>Submit Your Feedback</h1>
+            <p>Your feedback is stored directly in your browser.</p>
+        </header>
+
+        <section>
+            <form id="feedback-form">
+                <label for="feedback_textarea">Your Feedback:</label>
+                <textarea 
+                    id="feedback_textarea" 
+                    name="feedback" 
+                    rows="6" 
+                    placeholder="Please share your feedback here..."
+                    required
+                    minlength="10">
+                </textarea>
+                
+                <button type="submit">Submit Feedback</button>
+            </form>
+            <div id="status-message"></div>
+        </section>
+
+        <section>
+            <button id="view-feedback-btn" class="secondary">View All Feedback</button>
+            <button id="export-db-btn" class="secondary">Export Database (.db file)</button>
+            <ul id="feedback-list"></ul>
+        </section>
+    </main>
+
+    <script>
+        // Global variable to hold the database instance
+        let db = null;
+
+        // 2. Initialize the database when the page loads
+        window.onload = async function() {
+            // The sql.js library needs to load its WebAssembly file
+            const SQL = await initSqlJs({
+                locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+            });
+            
+            try {
+                // Create a new database
+                db = new SQL.Database();
+                console.log("In-memory SQLite database created.");
+
+                // Create the feedback table if it doesn't exist
+                const createTableQuery = `
+                    CREATE TABLE IF NOT EXISTS feedback (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        content TEXT NOT NULL,
+                        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                    );
+                `;
+                db.run(createTableQuery);
+                console.log("Table 'feedback' is ready.");
+
+            } catch (err) {
+                console.error("Error initializing database:", err);
+                alert("Failed to initialize the in-memory database.");
+            }
+        };
+
+        // 3. Handle form submission
+        document.getElementById('feedback-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Stop the form from doing a full page reload
+
+            if (!db) {
+                alert("Database not ready yet. Please wait a moment and try again.");
+                return;
+            }
+
+            const feedbackText = document.getElementById('feedback_textarea').value;
+            const statusDiv = document.getElementById('status-message');
+
+            try {
+                // Use a prepared statement to prevent SQL injection
+                const stmt = db.prepare("INSERT INTO feedback (content) VALUES (?)");
+                stmt.run([feedbackText]);
+                stmt.free();
+
+                console.log("Feedback inserted:", feedbackText);
+
+                // Show success message
+                statusDiv.textContent = "Thank you! Your feedback has been saved.";
+                statusDiv.className = 'success';
+                
+                // Clear the form
+                document.getElementById('feedback_textarea').value = '';
+
+                // Hide the message after 3 seconds
+                setTimeout(() => {
+                    statusDiv.textContent = '';
+                    statusDiv.className = '';
+                }, 3000);
+
+            } catch (err) {
+                console.error("Error inserting feedback:", err);
+                statusDiv.textContent = "Error: Could not save feedback.";
+                statusDiv.className = 'error';
+            }
+        });
+
+        // 4. Handle viewing feedback
+        document.getElementById('view-feedback-btn').addEventListener('click', function() {
+            if (!db) {
+                alert("Database not ready.");
+                return;
+            }
+            const feedbackList = document.getElementById('feedback-list');
+            feedbackList.innerHTML = ''; // Clear previous list
+
+            try {
+                const stmt = db.prepare("SELECT id, content, timestamp FROM feedback ORDER BY timestamp DESC");
+                while(stmt.step()) {
+                    const row = stmt.getAsObject();
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `<strong>${new Date(row.timestamp).toLocaleString()}:</strong> ${row.content}`;
+                    feedbackList.appendChild(listItem);
+                }
+                stmt.free();
+            } catch (err) {
+                console.error("Error fetching feedback:", err);
+            }
+        });
+
+        // 5. Handle database export
+        document.getElementById('export-db-btn').addEventListener('click', function() {
+            if (!db) {
+                alert("Database not ready.");
+                return;
+            }
+            try {
+                // Get the database as a binary array
+                const data = db.export();
+                // Create a Blob from the binary data
+                const blob = new Blob([data], { type: 'application/x-sqlite3' });
+                // Create a link to download the file
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'feedback.db';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                console.log("Database exported as feedback.db");
+            } catch (err) {
+                console.error("Error exporting database:", err);
+            }
+        });
+    </script>
+</body>
+</html>
