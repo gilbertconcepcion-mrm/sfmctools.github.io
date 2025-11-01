@@ -1,0 +1,1499 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Throttle Plan</title>
+  <style>
+    :root { 
+      font-family: Arial, Helvetica, sans-serif; 
+      font-size: clamp(12px, 2.5vw, 12px); 
+      color: #111; 
+    }
+    body { 
+      margin: 20px; 
+      background: #fff; 
+    }
+    
+    .container { 
+      width: 100%;
+      margin: 0 auto; 
+      padding: 0 20px;
+      box-sizing: border-box;
+      max-width: 1920px;
+    }
+    
+    h1 { 
+      font-size: 1.2em; 
+      margin: 0 0 8px; 
+    }
+    
+    .meta { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 8px; 
+      margin-bottom: 8px; 
+      align-items: center; 
+    }
+    
+    .meta .pill { 
+      background: #f5f5f5; 
+      padding: 0.4em 0.7em; 
+      border-radius: 6px; 
+      border: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      line-height: 1; 
+      white-space: nowrap; 
+    }
+
+    .meta .pill input[type="date"],
+    .meta .pill select {
+        border: none;
+        background: transparent;
+        font-family: inherit;
+        font-size: 1em;
+        padding: 0;
+        margin-left: 5px; 
+        cursor: pointer;
+    }
+    
+    .meta .pill select {
+        min-width: 80px; 
+    }
+
+    .btn {
+      color: white;
+      border: none;
+      padding: 0.5em 1em;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-green {
+      background: #4CAF50;
+    }
+
+    .btn-green:hover {
+      background: #45a049;
+    }
+
+    .btn-red {
+      background: #f44336;
+    }
+
+    .btn-red:hover {
+      background: #da190b;
+    }
+
+    .btn-blue {
+      background: #2196F3;
+    }
+
+    .btn-blue:hover {
+      background: #0b7dda;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn:disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .table-responsive-wrapper {
+      overflow-x: auto; 
+      width: 100%;
+      border: 1px solid #000000;
+    }
+    
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+    }
+    
+    thead th { 
+      background: #ffffff; 
+      border-bottom: 2px solid #ddd; 
+      padding: 0.6em 0.8em 0.6em 0.8em; 
+      font-weight: 700; 
+      text-align: left; 
+      white-space: nowrap; 
+    }
+    
+    .time-row th {
+      background: #f0f0f0;
+      font-weight: 600;
+      font-size: 0.95em;
+      color: #444;
+    }
+    
+    tbody td, tfoot td { 
+      padding: 0.6em 0.8em; 
+      border-bottom: 1px solid #eee; 
+      vertical-align: middle; 
+      white-space: nowrap; 
+    }
+    
+    td.center { 
+      text-align: center; 
+    }
+    
+    td.right { 
+      text-align: left; 
+    }
+    
+    .input-cell input {
+        width: 100%; 
+        box-sizing: border-box; 
+        padding: 0 0 0 0;
+        margin: 0;
+        border: 1px solid #dedcdc;
+        background: white;
+        font-family: inherit;
+        font-size: 1.10em; 
+        border-radius: 0;
+        outline: none;
+    }
+    
+    .input-cell.right input {
+        text-align: right; 
+    }
+      
+    .input-cell.left input {
+        text-align: left; 
+    }
+    .input-cell.center input {
+        text-align: center;
+    }
+    .campaign-name { 
+      min-width: 26em; 
+      width: 26em !important;
+      text-align: center;
+    }
+    
+    .small-col {
+      width: 120px; 
+    }
+    
+    .offset-col {
+      width: 60px;
+    }
+    
+    .offset-col.hidden,
+    .offset-cell.hidden {
+      display: none;
+    }
+    
+    .action-col.hidden,
+    .action-cell.hidden {
+      display: none !important;
+    }
+    
+    .input-cell input.preview-mode {
+      border: none !important;
+      background: transparent !important;
+      outline: none !important;
+      padding: 0 !important;
+    }
+    
+    .hour-col {
+      width: 120px;
+    }
+
+    .action-col {
+      width: 80px;
+    }
+
+    tfoot tr { 
+      background: #f9f9f9; 
+      font-weight: 700; 
+    }
+    
+    .total-cell { 
+      background: #ffffff; 
+      text-align: right; 
+    }
+    
+    .muted { 
+      color: #666; 
+      font-size: 0.85em; 
+    }
+    
+    table th, table td { 
+      border: 1px solid #ddd; 
+    }
+
+    .hour-value {
+      background-color: #ffffff;
+    }
+
+    .hour-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.3em;
+      margin: 0;
+      border: 1px solid #ddd;
+      background: white;
+      font-family: inherit;
+      font-size: 1em;
+      border-radius: 3px;
+      text-align: right;
+    }
+
+    .delete-row-btn {
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 0.4em 0.6em;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    .delete-row-btn:hover {
+      background: #da190b;
+    }
+
+    .delete-row-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .save-container {
+      margin-top: 0px;
+      margin-left: 20px;
+      text-align: right;
+    }
+      
+    .btn-clear {
+      padding: 8px;
+      text-align: right;
+      cursor: pointer;
+      border-radius: 5px;
+      border: 1px solid #cecece;
+      background-color: #f9f9f9;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .btn-clear:hover {
+      background-color: #e0e0e0;
+      transform: scale(1.05);
+    }
+  </style>
+<!--CALCULATOR STYLES-->
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      padding: 20px;
+      background: #fff;
+    }
+
+    .calculator-container {
+      background: #bcb8b8;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px 10px 10px 10px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      margin-left: 20px;
+      max-width: 250px;
+    }
+
+    .calculator-container h2 {
+      font-size: 1.1em;
+      margin: 0 0 12px 0;
+      font-weight: 600;
+    }
+
+    .calculator-table {
+      width: 100%;
+    }
+
+    .calculator-table td {
+      padding: 0.4em 0.6em;
+    }
+
+    .calculator-table .de-label {
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .calculator-table .count-input {
+      width: 120px;
+      padding: 0.3em 0.5em;
+      border: 1px solid #dddddd;
+      border-radius: 3px;
+      text-align: right;
+      font-family: inherit;
+      font-size: 1.2em;
+    }
+
+    .calculator-table .total-row {
+      border-top: 1px solid #333;
+      font-weight: 700;
+    }
+
+    /* Updated styles for the values display table */
+    .values-display-container {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      margin-left: 20px;
+      max-width: none;
+      box-sizing: border-box;
+      display: inline-block;
+    }
+
+    .values-display-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: auto;
+    }
+
+    .values-display-table th {
+      background: #e0e0e0;
+      padding: 8px 12px;
+      text-align: center;
+      font-weight: 600;
+      border: 1px solid #ccc;
+      white-space: nowrap;
+    }
+
+    .values-display-table td {
+      padding: 8px 12px;
+      text-align: right;
+      border: 1px solid #ccc;
+      white-space: nowrap;
+    }
+
+    .values-display-table .total-cell {
+      background: #e0e0e0;
+      font-weight: 700;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .values-display-container {
+        margin-left: 0;
+        width: 100%;
+      }
+      
+      .values-display-table th,
+      .values-display-table td {
+        padding: 6px 8px;
+        font-size: 0.9em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Throttle Plan</h1>
+    <div class="meta">
+      <div class="pill">
+        Start Date: 
+        <input type="date" value="2025-08-21" id="startDate" onchange="updateTimeHeaders()">
+      </div>
+      <div class="pill">
+        Start Time: 
+        <select id="startTimeSelect" onchange="updateTimeHeaders()"></select>
+      </div>
+      <div class="pill muted">Edit hour cells to manually adjust distribution • Offset is the start hour where throttle begins</div>
+    </div>
+
+    <div class="table-responsive-wrapper">
+      <table id="campaignTable">
+        <thead>
+          <tr id="timeRow" class="time-row"></tr>
+          <tr id="headerRow">
+            <th class="campaign-name">Campaign</th>
+            <th class="small-col">Audience Size</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+        <tfoot>
+          <tr id="footerRow">
+            <td class="muted">Totals</td>
+            <td class="right" id="totalAudience">0</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="meta" style="margin-top: 12px;">
+      <span style="margin-right: 4px; font-weight: 600;">CAMPAIGN</span>
+      <button class="btn btn-blue" onclick="addCampaignRow()">+</button>
+      <button class="btn btn-red" onclick="deleteCampaignRow()" id="removeCampaignBtn">−</button>
+      <span style="margin-left: 16px; margin-right: 4px; font-weight: 600;">HOUR</span>
+      <button class="btn btn-green" onclick="addHourColumn()">+</button>
+      <button class="btn btn-red" onclick="removeHourColumn()" id="removeHourBtn">−</button>
+      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-left: 5%;">
+          <span style="font-weight: 600; font-size: 20px; color: #d3d3d3;">|</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 2px; cursor: pointer;">
+          <input type="checkbox" id="showOffset" onchange="onShowOffsetChange()" checked style="cursor: pointer; width: 16px; height: 16px;">
+          <span style="font-weight: 600; color: #555;">Show Offset/Actions</span>
+      </label>
+      <div class="save-container">
+          <button class="btn btn-blue" onclick="saveTableAsCSV()">🔎 PREVIEW</button>
+      </div>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="autoRecalculate" onchange="onAutoRecalculateChange()" checked style="cursor: pointer; width: 16px; height: 16px; display: none; visibility: hidden;">
+          <span style="font-weight: 600; color: #555; display: none;">Auto Recalculate</span>
+        </label>
+        <button class="btn btn-blue" id="recalculateBtn" onclick="recalculateDistribution()" style="display: none;">🔄 Recalculate</button>
+      </div>
+    </div>
+
+    <p style="margin-top:12px;color:#555;font-size:13px">
+      <strong>Distribution:</strong> The first active hour value (based on offset) will be the hourly threshold. Last hour gets the remainder.
+    </p>
+
+  
+  <!--  CALCULATOR-->
+  <div class="calculator-container">
+    
+    <div style="padding: 10px 0px 10px 10px;">
+        <h2 style="display: inline-block; text-align: left; padding-right:89px;">Counts Calculator</h2><button class="btn-clear" style="padding: 8px; text-align:right; cursor: pointer; border-radius: 5px; border: 1px solid #cecece; cursor: pointer;" class="btn-clear" onclick="clearCalculator()">AC</button>
+    </div>
+    <table class="calculator-table">
+      <tbody>
+        <tr>
+          <td class="de-label">MAC:</td>
+          <td><input type="text" class="count-input" id="mac_count" value="0" oninput="calculateDETotal()"></td>
+        </tr>
+        <tr>
+          <td class="de-label">MEA:</td>
+          <td><input type="text" class="count-input" id="mea_count" value="0" oninput="calculateDETotal()"></td>
+        </tr>
+        <tr>
+          <td class="de-label">MEI:</td>
+          <td><input type="text" class="count-input" id="mei_count" value="0" oninput="calculateDETotal()"></td>
+        </tr>
+        <tr>
+          <td class="de-label">MEP:</td>
+          <td><input type="text" class="count-input" id="mep_count" value="0" oninput="calculateDETotal()"></td>
+        </tr>
+        <tr>
+          <td class="de-label">MPG:</td>
+          <td><input type="text" class="count-input" id="mpg_count" value="0" oninput="calculateDETotal()" style=""></td>
+        </tr>
+        <tr class="total-row">
+          <td class="de-label">Total:</td>
+          <td><input type="text" class="count-input" id="de_total" value="0" readonly style="cursor:text;"></td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>
+
+  <!-- VALUES DISPLAY TABLE -->
+  <div class="values-display-container">
+    <h2 style="font-size: 1.1em; margin: 0 0 12px 0; font-weight: 600;">Counts Summary</h2>
+    <table class="values-display-table">
+      <thead>
+        <tr>
+          <th>MAC</th>
+          <th>MEA</th>
+          <th>MEI</th>
+          <th>MEP</th>
+          <th>MPG</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="display_mac">0</td>
+          <td id="display_mea">0</td>
+          <td id="display_mei">0</td>
+          <td id="display_mep">0</td>
+          <td id="display_mpg">0</td>
+          <td id="display_total" class="total-cell">0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  </div>
+
+
+<script>
+    let hourCount = 4;
+    let nextCampaignId = 1;
+    let autoRecalculate = true;
+    let showOffset = true;
+    let viewAsPreview = false;
+    let campaigns = [
+      { id: nextCampaignId++, name: 'Email_1', audience: 0, hourValues: [], offset: 1 }
+    ];
+
+    function parseNum(s){ 
+        if(!s && s !== 0) return 0; 
+        const cleaned = String(s).replace(/,/g, '').trim();
+        const num = Number(cleaned) || 0;
+        return Math.max(0, Math.floor(num));
+    }
+
+    function fmt(n){ 
+        return Math.round(n).toLocaleString(); 
+    }
+
+    function distributeAudience(audience, numHours, offset = 1) {
+        if (numHours <= 0) return [];
+        const audienceNum = parseNum(audience);
+        const distribution = [];
+        
+        for (let i = 0; i < offset - 1 && i < numHours; i++) {
+            distribution.push(0);
+        }
+        
+        const remainingHours = numHours - (offset - 1);
+        if (remainingHours <= 0) {
+            return distribution;
+        }
+        
+        const baseAmount = Math.ceil(audienceNum / remainingHours);
+        let distributed = 0;
+        
+        for (let i = 0; i < remainingHours - 1; i++) {
+            distribution.push(baseAmount);
+            distributed += baseAmount;
+        }
+        
+        const lastHourAmount = audienceNum - distributed;
+        distribution.push(lastHourAmount);
+        
+        return distribution;
+    }
+
+    function updateTimeHeaders() {
+        const timeRow = document.getElementById('timeRow');
+        const startTimeSelect = document.getElementById('startTimeSelect');
+        const startTime = startTimeSelect.value;
+        
+        if (!startTime) return;
+        
+        const [hours, minutes] = startTime.split(':').map(Number);
+        const increment = minutes === 30 ? 30 : 60;
+        
+        timeRow.innerHTML = '';
+        
+        const th1 = document.createElement('th');
+        th1.className = 'campaign-name';
+        timeRow.appendChild(th1);
+        
+        const th2 = document.createElement('th');
+        th2.className = 'small-col';
+        timeRow.appendChild(th2);
+        
+        const th3 = document.createElement('th');
+        th3.className = showOffset ? 'offset-col' : 'offset-col hidden';
+        timeRow.appendChild(th3);
+        
+        
+        
+        
+        for (let h = 0; h < hourCount; h++) {
+//            const totalMinutes = hours * 60 + minutes + (h * increment);
+            const totalMinutes = hours * 60 + minutes + (h * 60);
+            const displayHours = Math.floor(totalMinutes / 60) % 24;
+            const displayMinutes = totalMinutes % 60;
+            
+            const period = displayHours < 12 ? 'AM' : 'PM';
+            const hr12 = (displayHours % 12) === 0 ? 12 : (displayHours % 12);
+            const timeText = `${hr12}:${String(displayMinutes).padStart(2, '0')} ${period}`;
+            
+            const th = document.createElement('th');
+            th.className = 'hour-col';
+            th.textContent = timeText;
+            // Calculate which day this time belongs to
+            const daysOffset = Math.floor(totalMinutes / (60 * 24));
+            const startDateInput = document.getElementById('startDate');
+            const startDate = new Date(startDateInput.value + 'T00:00:00');
+            const currentDate = new Date(startDate);
+            currentDate.setDate(currentDate.getDate() + daysOffset);
+
+            // Format date as "Oct. 10"
+            const monthNames = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
+            const dateText = `${monthNames[currentDate.getMonth()]} ${currentDate.getDate()}`;
+
+            th.innerHTML = `${timeText} <span style="font-size: 0.85em; color: #666;">(${dateText})</span>`;
+
+            // Check if time has rolled over to next day
+            if (daysOffset > 0) {
+                th.style.color = '#ff0000'; // Red color for next day
+            }
+            timeRow.appendChild(th);
+        }
+        
+        const thTotal = document.createElement('th');
+        thTotal.className = 'small-col';
+        timeRow.appendChild(thTotal);
+        
+        const thActions = document.createElement('th');
+        thActions.className = 'action-col';
+        timeRow.appendChild(thActions);
+        
+        onShowOffsetChange();
+    }
+
+    function onHourValueChange(campaignId, hourIndex) {
+        const campaign = campaigns.find(c => c.id === campaignId);
+        if (!campaign) return;
+
+        const input = document.getElementById(`hour_${campaignId}_${hourIndex}`);
+        let newValue = parseNum(input.value);
+
+        const audienceInput = document.getElementById(`audience_${campaignId}`);
+        const targetAudience = parseNum(audienceInput ? audienceInput.value : campaign.audience);
+
+        if (newValue > targetAudience) {
+            newValue = targetAudience;
+            input.value = fmt(newValue);
+
+            // If this is the offset hour, set all subsequent hours to 0
+            if (hourIndex === (campaign.offset - 1)) {
+                for (let i = hourIndex + 1; i < hourCount; i++) {
+                    campaign.hourValues[i] = 0;
+                    const hourInput = document.getElementById(`hour_${campaignId}_${i}`);
+                    if (hourInput) {
+                        hourInput.value = fmt(0);
+                    }
+                }
+            }
+        }
+
+        if (!campaign.hourValues) campaign.hourValues = [];
+        campaign.hourValues[hourIndex] = newValue;
+
+        // If auto recalculate is enabled and this is the offset hour, recalculate
+        if (autoRecalculate && hourIndex === (campaign.offset - 1)) {
+            recalculateSingleCampaign(campaign);
+        }
+
+        calculateTotals();
+    }
+
+    function onAutoRecalculateChange() {
+        const checkbox = document.getElementById('autoRecalculate');
+        const recalculateBtn = document.getElementById('recalculateBtn');
+        autoRecalculate = checkbox.checked;
+        
+        // Show/hide recalculate button based on checkbox state
+        if (recalculateBtn) {
+            recalculateBtn.style.display = autoRecalculate ? 'none' : 'inline-block';
+        }
+    }
+
+    function onShowOffsetChange() {
+        const checkbox = document.getElementById('showOffset');
+        showOffset = checkbox.checked;
+        
+        // Toggle visibility of all offset columns
+        const offsetHeaders = document.querySelectorAll('.offset-col');
+        const offsetCells = document.querySelectorAll('.offset-cell');
+        const actionHeader = document.querySelectorAll('.action-col');
+        const actionsetCells = document.querySelectorAll('.action-cell');
+        
+        offsetHeaders.forEach(el => {
+            if (showOffset) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+        
+        actionHeader.forEach(el => {
+            if (showOffset) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+        
+        offsetCells.forEach(el => {
+            if (showOffset) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+        actionsetCells.forEach(el => {
+            if (showOffset) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+
+        // Toggle last column of all rows (header, body, footer)
+        const allRows = document.querySelectorAll('#campaignTable tr');
+        allRows.forEach(row => {
+            if (row.children.length > 0) {
+                const lastCell = row.children[row.children.length - 1];
+                if (showOffset) {
+                    lastCell.style.display = '';
+                } else {
+                    lastCell.style.display = 'none';
+                }
+            }
+        });     
+    }
+
+    function onViewAsPreviewChange() {
+        const checkbox = document.getElementById('viewAsPreview');
+        viewAsPreview = checkbox.checked;
+        
+        // Rebuild the table to apply preview mode
+        rebuildTable();
+    }
+
+    function recalculateSingleCampaign(campaign) {
+        const offset = campaign.offset || 1;
+        const firstActiveHourIndex = offset - 1;
+        const hour1Input = document.getElementById(`hour_${campaign.id}_${firstActiveHourIndex}`);
+        let hour1Value = parseNum(hour1Input ? hour1Input.value : (campaign.hourValues[firstActiveHourIndex] || 0));
+
+        const audienceInput = document.getElementById(`audience_${campaign.id}`);
+        const targetAudience = parseNum(audienceInput ? audienceInput.value : campaign.audience);
+
+        if (hour1Value > targetAudience) {
+            hour1Value = targetAudience;
+        }
+
+        // Set all hours before offset to 0
+        for (let i = 0; i < offset - 1 && i < hourCount; i++) {
+            campaign.hourValues[i] = 0;
+        }
+
+        let distributed = hour1Value;
+        campaign.hourValues[firstActiveHourIndex] = hour1Value;
+
+        // Distribute to subsequent hours
+        for (let i = offset; i < hourCount; i++) {
+            const remaining = targetAudience - distributed;
+
+            if (remaining <= 0) {
+                // No more to distribute
+                campaign.hourValues[i] = 0;
+            } else if (remaining < hour1Value) {
+                // Put remainder in this cell and set rest to 0
+                campaign.hourValues[i] = remaining;
+                distributed += remaining;
+                // Set all subsequent hours to 0
+                for (let j = i + 1; j < hourCount; j++) {
+                    campaign.hourValues[j] = 0;
+                }
+                break;
+            } else {
+                // Continue with regular distribution
+                campaign.hourValues[i] = hour1Value;
+                distributed += hour1Value;
+            }
+        }
+
+        // Update all hour inputs
+        for (let i = 0; i < hourCount; i++) {
+            const hourInput = document.getElementById(`hour_${campaign.id}_${i}`);
+            if (hourInput) {
+                hourInput.value = fmt(campaign.hourValues[i] || 0);
+            }
+        }
+    }
+
+    function onOffsetChange(campaignId) {
+        const campaign = campaigns.find(c => c.id === campaignId);
+        if (!campaign) return;
+        
+        const offsetInput = document.getElementById(`offset_${campaignId}`);
+        let offsetValue = parseNum(offsetInput.value);
+        
+        if (offsetValue < 1) offsetValue = 1;
+        if (offsetValue > hourCount) offsetValue = hourCount;
+        
+        offsetInput.value = offsetValue;
+        campaign.offset = offsetValue;
+        
+        const audienceInput = document.getElementById(`audience_${campaignId}`);
+        const targetAudience = parseNum(audienceInput ? audienceInput.value : campaign.audience);
+        campaign.hourValues = distributeAudience(targetAudience, hourCount, campaign.offset);
+        
+        for (let i = 0; i < hourCount; i++) {
+            const hourInput = document.getElementById(`hour_${campaignId}_${i}`);
+            if (hourInput) {
+                hourInput.value = fmt(campaign.hourValues[i] || 0);
+                // Update readonly state
+                const isEditable = i === (offsetValue - 1);
+                hourInput.readOnly = !isEditable;
+//                hourInput.style.background = isEditable ? 'white' : '#f5f5f5';
+                hourInput.style.background = isEditable ? '#ffffc1' : '#f5f5f5';
+                hourInput.style.cursor = isEditable ? 'text' : 'not-allowed';
+            }
+        }
+        
+        calculateTotals();
+    }
+
+    function recalculateDistribution() {
+        campaigns.forEach(campaign => {
+            const offset = campaign.offset || 1;
+            
+            const firstActiveHourIndex = offset - 1;
+            const hour1Input = document.getElementById(`hour_${campaign.id}_${firstActiveHourIndex}`);
+            let hour1Value = parseNum(hour1Input ? hour1Input.value : (campaign.hourValues[firstActiveHourIndex] || 0));
+            
+            const audienceInput = document.getElementById(`audience_${campaign.id}`);
+            const targetAudience = parseNum(audienceInput ? audienceInput.value : campaign.audience);
+            
+            if (hour1Value > targetAudience) {
+                hour1Value = targetAudience;
+            }
+            
+            for (let i = 0; i < offset - 1 && i < hourCount; i++) {
+                campaign.hourValues[i] = 0;
+            }
+            
+            let distributed = 0;
+            for (let i = offset - 1; i < hourCount - 1; i++) {
+                campaign.hourValues[i] = hour1Value;
+                distributed += hour1Value;
+            }
+            
+            campaign.hourValues[hourCount - 1] = targetAudience - distributed;
+            
+            for (let i = 0; i < hourCount; i++) {
+                const hourInput = document.getElementById(`hour_${campaign.id}_${i}`);
+                if (hourInput) {
+                    hourInput.value = fmt(campaign.hourValues[i] || 0);
+                }
+            }
+        });
+        
+        calculateTotals();
+    }
+
+    function rebuildTable() {
+        const headerRow = document.getElementById('headerRow');
+        const tableBody = document.getElementById('tableBody');
+        const footerRow = document.getElementById('footerRow');
+
+        while (headerRow.children.length > 2) headerRow.removeChild(headerRow.lastChild);
+        
+        const offsetTh = document.createElement('th');
+        offsetTh.className = showOffset ? 'offset-col' : 'offset-col hidden';
+        offsetTh.textContent = 'Offset';
+        headerRow.appendChild(offsetTh);
+        
+        for (let h = 1; h <= hourCount; h++) {
+            const th = document.createElement('th');
+            th.className = 'hour-col';
+            th.textContent = `Hour ${h}`;
+            headerRow.appendChild(th);
+        }
+
+        const totalTh = document.createElement('th');
+        totalTh.className = 'small-col';
+        totalTh.textContent = 'Total Volume';
+        headerRow.appendChild(totalTh);
+        const actionTh = document.createElement('th');
+        actionTh.className = 'action-col';
+        actionTh.textContent = 'Actions';
+        headerRow.appendChild(actionTh);
+
+        updateTimeHeaders();
+
+        tableBody.innerHTML = '';
+        campaigns.forEach((campaign, idx) => {
+            const tr = document.createElement('tr');
+            
+            tr.id = `row_${campaign.id}`;
+
+            const nameTd = document.createElement('td');
+//            nameTd.className = 'input-cell';
+            nameTd.className = 'input-cell center';
+            nameTd.innerHTML = `<input type="text" value="${escapeHtml(campaign.name)}" id="name_${campaign.id}" oninput="onNameChange(${campaign.id})">`;
+            tr.appendChild(nameTd);
+
+            const audienceTd = document.createElement('td');
+            audienceTd.className = 'input-cell left';
+            audienceTd.innerHTML = `<input type="text" value="${fmt(campaign.audience)}" id="audience_${campaign.id}" oninput="onAudienceChange(${campaign.id})" style="background: #ffffc1;">`;
+            tr.appendChild(audienceTd);
+
+            const offsetTd = document.createElement('td');
+            offsetTd.className = showOffset ? 'input-cell left offset-cell' : 'input-cell left offset-cell hidden';
+            const currentOffset = campaign.offset || 1;
+            offsetTd.innerHTML = `<input type="text" value="${currentOffset}" id="offset_${campaign.id}" oninput="onOffsetChange(${campaign.id})" style="background: #ffffc1;">`;
+            tr.appendChild(offsetTd);
+
+            if (!campaign.hourValues || campaign.hourValues.length !== hourCount) {
+                campaign.hourValues = distributeAudience(campaign.audience, hourCount, currentOffset);
+            }
+
+            campaign.hourValues.forEach((value, hIndex) => {
+                const hourTd = document.createElement('td');
+                hourTd.className = 'input-cell left';
+                const isEditable = hIndex === (currentOffset - 1);
+                const readonlyAttr = isEditable ? '' : ' readonly';
+//                const readonlyStyle = isEditable ? '' : ' background: #f5f5f5; cursor: not-allowed;';
+                const readonlyStyle = isEditable ? ' background: #ffffc1;' : ' background: #f5f5f5; cursor: not-allowed;';
+                const hourInputClass = viewAsPreview ? 'hour-input preview-mode' : 'hour-input';
+                const previewStyle = viewAsPreview ? (isEditable ? '' : ' background: transparent !important;') : readonlyStyle;
+                hourTd.innerHTML = `<input type="text" class="${hourInputClass}" value="${fmt(value)}" id="hour_${campaign.id}_${hIndex}" oninput="onHourValueChange(${campaign.id}, ${hIndex})"${readonlyAttr} style="${previewStyle}">`;
+                tr.appendChild(hourTd);
+            });
+
+            const totalTd = document.createElement('td');
+            totalTd.className = 'right total-cell';
+            totalTd.id = `total_${campaign.id}`;
+            totalTd.textContent = fmt(campaign.audience);
+            tr.appendChild(totalTd);
+
+            const actionTd = document.createElement('td');
+            actionTd.className = 'center';
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-row-btn';
+            deleteBtn.innerHTML = '✕';
+            deleteBtn.title = 'Delete';
+            deleteBtn.onclick = () => deleteCampaignRow(campaign.id);
+            deleteBtn.disabled = campaigns.length === 1;
+            actionTd.appendChild(deleteBtn);
+            
+            tr.appendChild(actionTd);
+
+            tableBody.appendChild(tr);
+        });
+
+        while (footerRow.children.length > 2) footerRow.removeChild(footerRow.lastChild);
+        
+        const offsetFooterTd = document.createElement('td');
+        offsetFooterTd.className = showOffset ? 'right offset-cell' : 'right offset-cell hidden';
+        footerRow.appendChild(offsetFooterTd);
+        
+        for (let h = 1; h <= hourCount; h++) {
+            const td = document.createElement('td');
+            td.className = 'right total-cell';
+            td.id = `hour_total_${h}`;
+            footerRow.appendChild(td);
+        }
+
+        const grandTd = document.createElement('td');
+        grandTd.className = 'right';
+        grandTd.id = 'grandTotal';
+        footerRow.appendChild(grandTd);
+        const emptyTd = document.createElement('td');
+        footerRow.appendChild(emptyTd);
+
+        calculateTotals();
+        updateButtons();
+        onShowOffsetChange();
+    }
+
+    function calculateTotals() {
+        let totalAudience = 0;
+        let grandTotal = 0;
+        const hourTotals = new Array(hourCount).fill(0);
+
+        campaigns.forEach(campaign => {
+            const audienceInput = document.getElementById(`audience_${campaign.id}`);
+            const audience = parseNum(audienceInput ? audienceInput.value : campaign.audience);
+            totalAudience += audience;
+
+            let campaignTotal = 0;
+            for (let i = 0; i < hourCount; i++) {
+                const hourInput = document.getElementById(`hour_${campaign.id}_${i}`);
+                const hourValue = parseNum(hourInput ? hourInput.value : (campaign.hourValues[i] || 0));
+                hourTotals[i] += hourValue;
+                campaignTotal += hourValue;
+            }
+
+            // Validation: If total is less than target audience, add remainder to last hour
+            if (campaignTotal < audience) {
+                const deficit = audience - campaignTotal;
+                const lastHourIndex = hourCount - 1;
+                const lastHourInput = document.getElementById(`hour_${campaign.id}_${lastHourIndex}`);
+
+                if (lastHourInput) {
+                    const currentLastHourValue = parseNum(lastHourInput.value);
+                    const newLastHourValue = currentLastHourValue + deficit;
+                    campaign.hourValues[lastHourIndex] = newLastHourValue;
+                    lastHourInput.value = fmt(newLastHourValue);
+
+                    // Update hour totals
+                    hourTotals[lastHourIndex] += deficit;
+                    campaignTotal += deficit;
+                }
+            }
+
+            const totalCell = document.getElementById(`total_${campaign.id}`);
+            if (totalCell) totalCell.textContent = fmt(campaignTotal);
+
+            grandTotal += campaignTotal;
+        });
+
+        document.getElementById('totalAudience').textContent = fmt(totalAudience);
+
+        hourTotals.forEach((total, index) => {
+            const cell = document.getElementById(`hour_total_${index + 1}`);
+            if (cell) {
+                cell.textContent = fmt(total);
+                // Color red if over 500,000
+                if (total > 500000) {
+                    cell.style.color = '#f44336';
+                } else {
+                    cell.style.color = '';
+                }
+            }
+        });
+
+        document.getElementById('grandTotal').textContent = fmt(grandTotal);
+        // Color grand total red if over 500,000
+        const grandTotalEl = document.getElementById('grandTotal');
+        if (grandTotalEl) {
+            if (grandTotal > 500000) {
+                grandTotalEl.style.color = '#0014ff';
+            } else {
+                grandTotalEl.style.color = '';
+            }
+        }
+    }
+
+    function onNameChange(campaignId) {
+        const nameInput = document.getElementById(`name_${campaignId}`);
+        const campaign = campaigns.find(c => c.id === campaignId);
+        if (campaign && nameInput) campaign.name = nameInput.value;
+    }
+
+    function onAudienceChange(campaignId) {
+        const audienceInput = document.getElementById(`audience_${campaignId}`);
+        const campaign = campaigns.find(c => c.id === campaignId);
+        if (campaign && audienceInput) {
+            campaign.audience = parseNum(audienceInput.value);
+            audienceInput.value = fmt(campaign.audience);
+            
+            const offset = campaign.offset || 1;
+            campaign.hourValues = distributeAudience(campaign.audience, hourCount, offset);
+            
+            for (let i = 0; i < hourCount; i++) {
+                const hourInput = document.getElementById(`hour_${campaignId}_${i}`);
+                if (hourInput) {
+                    hourInput.value = fmt(campaign.hourValues[i] || 0);
+                }
+            }
+        }
+        calculateTotals();
+    }
+
+    function addHourColumn() { hourCount++; rebuildTable(); }
+    function removeHourColumn() { if (hourCount > 1) { hourCount--; rebuildTable(); } }
+
+    function addCampaignRow() {
+        campaigns.push({ 
+            id: nextCampaignId++, 
+            name: `Email_${campaigns.length + 1}`, 
+            audience: 0,
+            hourValues: new Array(hourCount).fill(0),
+            offset: 1
+        });
+        rebuildTable();
+    }
+
+    function deleteCampaignRow(campaignId) {
+        if (campaigns.length > 1) {
+            if (campaignId === undefined) campaigns.pop();
+            else campaigns = campaigns.filter(c => c.id !== campaignId);
+            rebuildTable();
+        }
+    }
+
+    function updateButtons() {
+        const removeHourBtn = document.getElementById('removeHourBtn');
+        if (removeHourBtn) removeHourBtn.disabled = hourCount <= 1;
+
+        const removeCampaignBtn = document.getElementById('removeCampaignBtn');
+        if (removeCampaignBtn) removeCampaignBtn.disabled = campaigns.length === 1;
+
+        document.querySelectorAll('.delete-row-btn').forEach(btn => {
+            btn.disabled = campaigns.length === 1;
+        });
+    }
+
+    function generateTimeOptions() {
+        const select = document.getElementById('startTimeSelect');
+        const defaultTime = "10:00"; 
+        for (let h = 0; h < 24; h++) {
+            for (let m = 0; m < 60; m += 30) {
+                const hr24 = String(h).padStart(2, '0');
+                const min = String(m).padStart(2, '0');
+                const value24 = `${hr24}:${min}`;
+
+                const period = h < 12 ? 'AM' : 'PM';
+                const hr12 = (h % 12) === 0 ? 12 : (h % 12);
+                const displayText = `${hr12}:${min} ${period}`;
+
+                const option = document.createElement('option');
+                option.value = value24;
+                option.textContent = displayText;
+                if (value24 === defaultTime) option.selected = true;
+                select.appendChild(option);
+            }
+        }
+        
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').value = today;
+    }
+
+function saveTableAsCSV() {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000000; display: flex; align-items: center; justify-content: center; z-index: 10000;';
+
+    // Create close button (at top right of page)
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '✕';
+    closeBtn.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f44336; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10001;';
+    closeBtn.onclick = () => document.body.removeChild(overlay);
+    closeBtn.onmouseover = () => closeBtn.style.background = '#da190b';
+    closeBtn.onmouseout = () => closeBtn.style.background = '#f44336';
+
+    // Create zoom container
+    const zoomContainer = document.createElement('div');
+    zoomContainer.style.cssText = 'position: fixed; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 10001;';
+
+    // Create zoom out button
+    const zoomOutBtn = document.createElement('button');
+    zoomOutBtn.innerHTML = '🔍−';
+    zoomOutBtn.style.cssText = 'background: #2196F3; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(33,150,243,0.4); transition: all 0.3s ease;';
+    zoomOutBtn.onmouseover = () => { zoomOutBtn.style.background = '#0b7dda'; zoomOutBtn.style.transform = 'scale(1.1)'; };
+    zoomOutBtn.onmouseout = () => { zoomOutBtn.style.background = '#2196F3'; zoomOutBtn.style.transform = 'scale(1)'; };
+
+    // Create reset zoom button
+    const zoomResetBtn = document.createElement('button');
+    zoomResetBtn.innerHTML = '100%';
+    zoomResetBtn.style.cssText = 'background: #FF9800; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(255,152,0,0.4); transition: all 0.3s ease;';
+    zoomResetBtn.onmouseover = () => { zoomResetBtn.style.background = '#F57C00'; zoomResetBtn.style.transform = 'scale(1.1)'; };
+    zoomResetBtn.onmouseout = () => { zoomResetBtn.style.background = '#FF9800'; zoomResetBtn.style.transform = 'scale(1)'; };
+
+    // Create zoom in button
+    const zoomInBtn = document.createElement('button');
+    zoomInBtn.innerHTML = '🔍+';
+    zoomInBtn.style.cssText = 'background: #4CAF50; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(76,175,80,0.4); transition: all 0.3s ease;';
+    zoomInBtn.onmouseover = () => { zoomInBtn.style.background = '#45a049'; zoomInBtn.style.transform = 'scale(1.1)'; };
+    zoomInBtn.onmouseout = () => { zoomInBtn.style.background = '#4CAF50'; zoomInBtn.style.transform = 'scale(1)'; };
+
+    // Create content container
+    const container = document.createElement('div');
+    container.style.cssText = 'background: linear-gradient(to bottom, white 30%, #ffffff 50%); padding: 30px; border-radius: 12px; max-width: 95%; max-height: 95%; overflow: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); transition: transform 0.3s cubic-bezier(.61, .48, .35, .87);';
+
+    // Zoom functionality
+    let currentZoom = 1;
+    const minZoom = 0.5;
+    const maxZoom = 2;
+    const zoomStep = 0.15;
+
+    zoomInBtn.onclick = () => {
+        if (currentZoom < maxZoom) {
+            currentZoom += zoomStep;
+            currentZoom = Math.min(currentZoom, maxZoom);
+            container.style.transform = `scale(${currentZoom})`;
+            zoomResetBtn.innerHTML = `${Math.round(currentZoom * 100)}%`;
+        }
+    };
+
+    zoomOutBtn.onclick = () => {
+        if (currentZoom > minZoom) {
+            currentZoom -= zoomStep;
+            currentZoom = Math.max(currentZoom, minZoom);
+            container.style.transform = `scale(${currentZoom})`;
+            zoomResetBtn.innerHTML = `${Math.round(currentZoom * 100)}%`;
+        }
+    };
+
+    zoomResetBtn.onclick = () => {
+        currentZoom = 1;
+        container.style.transform = 'scale(1)';
+        zoomResetBtn.innerHTML = '100%';
+    };
+
+    // Append zoom buttons to container
+    zoomContainer.appendChild(zoomOutBtn);
+    zoomContainer.appendChild(zoomResetBtn);
+    zoomContainer.appendChild(zoomInBtn);
+
+    // Create title
+    const title = document.createElement('h2');
+    title.textContent = 'Counts and Throttle Plan';
+    title.style.cssText = 'margin: 0 0 15px 0; text-align: center; font-size: 24px; color: #2c3e50; font-weight: 700; letter-spacing: -0.5px;';
+
+    // Create date/time info
+    const startDateInput = document.getElementById('startDate');
+    const startTimeSelect = document.getElementById('startTimeSelect');
+    const dateTimeInfo = document.createElement('div');
+    dateTimeInfo.style.cssText = 'text-align: center; margin-bottom: 10px; color: #666; font-size: 12px;';
+    dateTimeInfo.innerHTML = `<strong>Start Date/Time:</strong> ${startDateInput.value}<strong>&nbsp; | &nbsp;</strong>${startTimeSelect.options[startTimeSelect.selectedIndex].text}`;
+
+    // Create Campaigns display
+    const campaignNames = campaigns.map(c => c.name).join(', ');
+    const campaignNamesDiv = document.createElement('div');
+    campaignNamesDiv.style.cssText = 'text-align: center; margin-bottom: 15px; color: #444; font-size: 12px;';
+    campaignNamesDiv.innerHTML = `<strong>Campaigns:</strong> ${campaignNames}`;
+
+    // Create download button
+    const downloadBtn = document.createElement('button');
+    downloadBtn.textContent = '📥 Download';
+    downloadBtn.style.cssText = 'display: none; margin: 0 auto 15px; margin-top:10px; background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;';
+    downloadBtn.onmouseover = () => downloadBtn.style.background = '#45a049';
+    downloadBtn.onmouseout = () => downloadBtn.style.background = '#4CAF50';
+    downloadBtn.onclick = () => downloadTableAsExcel();
+
+    container.appendChild(title);
+    container.appendChild(dateTimeInfo);
+    container.appendChild(campaignNamesDiv);
+
+    // Get start date for hours display
+    const startDate = new Date(startDateInput.value + 'T00:00:00');
+    const [hours, minutes] = startTimeSelect.value.split(':').map(Number);
+
+    // Create table
+    const table = document.createElement('table');
+    table.style.cssText = 'width: 100%; border-collapse: collapse; border: 1px solid #000000; background: #FFFFFF;';
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+
+    // Add column headers
+    ['Campaign', 'Audience Size'].forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        th.style.cssText = 'border: 1px solid #ddd; padding: 8px 10px; background: linear-gradient(to bottom, #f8f9fa, #e9ecef); font-weight: bold; text-align: left; font-size: 11px;';
+        headerRow.appendChild(th);
+    });
+
+    // Add hour columns with dates
+    for (let i = 0; i < hourCount; i++) {
+        const th = document.createElement('th');
+        const totalMinutes = hours * 60 + minutes + (i * 60);
+        const displayHours = Math.floor(totalMinutes / 60) % 24;
+        const displayMinutes = totalMinutes % 60;
+        const period = displayHours < 12 ? 'AM' : 'PM';
+        const hr12 = (displayHours % 12) === 0 ? 12 : (displayHours % 12);
+        const timeText = `${hr12}:${String(displayMinutes).padStart(2, '0')} ${period}`;
+
+        const daysOffset = Math.floor(totalMinutes / (60 * 24));
+        const currentDate = new Date(startDate);
+        currentDate.setDate(currentDate.getDate() + daysOffset);
+        const monthNames = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
+        const dateText = `${monthNames[currentDate.getMonth()]} ${currentDate.getDate()}`;
+
+        // Check if date is different from start date
+        const isDifferentDate = daysOffset > 0;
+        const dateColor = isDifferentDate ? '#ff0000' : '#888888';
+
+        th.innerHTML = `<span style="font-weight: normal; font-size:0.8em;">${timeText}</span><br>Hour ${i + 1}<br><span style="font-size: 0.8em; color: ${dateColor};">${dateText}</span>`;
+        th.style.cssText = 'border: 1px solid #ddd; padding: 6px 4px; background: #f5f5f5; font-weight: bold; text-align: center; white-space: nowrap;';
+        headerRow.appendChild(th);
+    }
+
+    const thTotal = document.createElement('th');
+    thTotal.textContent = 'Total';
+    thTotal.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; background: #f5f5f5; font-weight: bold; text-align: left; font-size: 1em;';
+    headerRow.appendChild(thTotal);
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Create body
+    const tbody = document.createElement('tbody');
+    campaigns.forEach(campaign => {
+        const tr = document.createElement('tr');
+
+        // Campaign
+        const tdName = document.createElement('td');
+        tdName.textContent = campaign.name;
+        tdName.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; white-space: nowrap;';
+        tr.appendChild(tdName);
+
+        // Audience size
+        const tdAudience = document.createElement('td');
+        const audienceValue = parseNum(campaign.audience);
+        tdAudience.textContent = audienceValue === 0 ? '---' : fmt(audienceValue);
+        tdAudience.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; text-align: right; color: #0014ff;';
+        tr.appendChild(tdAudience);
+
+        // Hour values
+        for (let i = 0; i < hourCount; i++) {
+            const td = document.createElement('td');
+            const hourValue = campaign.hourValues[i] || 0;
+            td.textContent = hourValue === 0 ? '---' : fmt(hourValue);
+            const isOffsetHour = i === (campaign.offset - 1);
+            const bgColor = isOffsetHour ? '#fffacd' : 'white';
+            td.style.cssText = `border: 1px solid #ddd; padding: 6px 4px; text-align: right; background: ${bgColor};`;
+            tr.appendChild(td);
+        }
+
+        // Total
+        const tdTotal = document.createElement('td');
+        const totalValue = campaign.hourValues.reduce((sum, val) => sum + (val || 0), 0);
+        tdTotal.textContent = totalValue === 0 ? '---' : fmt(totalValue);
+        tdTotal.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; text-align: right; font-weight: bold; font-size:1em;';
+        tr.appendChild(tdTotal);
+
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    // Create footer (grand totals)
+    const tfoot = document.createElement('tfoot');
+    const footerRow = document.createElement('tr');
+    footerRow.style.cssText = 'background: #f9f9f9; font-weight: bold;';
+
+    const tdLabel = document.createElement('td');
+    tdLabel.textContent = 'Total';
+    tdLabel.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; font-weight: bold;';
+    footerRow.appendChild(tdLabel);
+
+    const tdTotalAudience = document.createElement('td');
+    const totalAudience = campaigns.reduce((sum, c) => sum + parseNum(c.audience), 0);
+    tdTotalAudience.textContent = totalAudience === 0 ? '---' : fmt(totalAudience);
+    tdTotalAudience.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; text-align: right; font-weight: bold;';
+    footerRow.appendChild(tdTotalAudience);
+
+    // Hour totals
+    for (let i = 0; i < hourCount; i++) {
+        const td = document.createElement('td');
+        const hourTotal = campaigns.reduce((sum, c) => sum + (c.hourValues[i] || 0), 0);
+        td.textContent = hourTotal === 0 ? '---' : fmt(hourTotal);
+        td.style.cssText = 'border: 1px solid #ddd; padding: 6px 4px; text-align: right; font-weight: bold;';
+        if (hourTotal > 500000) {
+            td.style.color = '#f44336';
+        }
+        footerRow.appendChild(td);
+    }
+
+    // Grand total volume
+    const tdGrandTotal = document.createElement('td');
+    const grandTotal = campaigns.reduce((sum, c) => sum + c.hourValues.reduce((s, v) => s + (v || 0), 0), 0);
+    tdGrandTotal.textContent = grandTotal === 0 ? '---' : fmt(grandTotal);
+    tdGrandTotal.style.cssText = 'border: 1px solid #ddd; padding: 6px 8px; text-align: right; font-weight: bold;';
+    if (grandTotal > 500000) {
+        tdGrandTotal.style.color = '#0014ff';
+    }
+    footerRow.appendChild(tdGrandTotal);
+
+    tfoot.appendChild(footerRow);
+    table.appendChild(tfoot);
+
+    // Assemble overlay
+    overlay.appendChild(zoomContainer);
+    overlay.appendChild(closeBtn);
+    container.appendChild(table);
+    overlay.appendChild(container);
+
+    container.appendChild(downloadBtn);
+
+    document.body.appendChild(overlay);
+
+    // Function to download table as Excel
+    function downloadTableAsExcel() {
+        // Create workbook data array
+    }
+}
+
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    window.onload = function() {
+        generateTimeOptions();
+        rebuildTable();
+    };
+</script>
+
+  <script>
+    function parseNum(s) { 
+      if (!s && s !== 0) return 0; 
+      const cleaned = String(s).replace(/,/g, '').trim();
+      const num = Number(cleaned) || 0;
+      return Math.max(0, Math.floor(num));
+    }
+
+    function fmt(n) { 
+      return Math.round(n).toLocaleString(); 
+    }
+
+    function calculateDETotal() {
+      const mac = parseNum(document.getElementById('mac_count').value);
+      const mea = parseNum(document.getElementById('mea_count').value);
+      const mei = parseNum(document.getElementById('mei_count').value);
+      const mep = parseNum(document.getElementById('mep_count').value);
+      const mpg = parseNum(document.getElementById('mpg_count').value);
+      
+      const total = mac + mea + mei + mep + mpg;
+      
+      // Format all values
+      document.getElementById('mac_count').value = fmt(mac);
+      document.getElementById('mea_count').value = fmt(mea);
+      document.getElementById('mei_count').value = fmt(mei);
+      document.getElementById('mep_count').value = fmt(mep);
+      document.getElementById('mpg_count').value = fmt(mpg);
+      
+      // Update total field
+      document.getElementById('de_total').value = fmt(total);
+      
+      // Update the display table
+      document.getElementById('display_mac').textContent = fmt(mac);
+      document.getElementById('display_mea').textContent = fmt(mea);
+      document.getElementById('display_mei').textContent = fmt(mei);
+      document.getElementById('display_mep').textContent = fmt(mep);
+      document.getElementById('display_mpg').textContent = fmt(mpg);
+      document.getElementById('display_total').textContent = fmt(total);
+    }
+      
+    function clearCalculator() {
+      const ids = ['mac_count', 'mea_count', 'mei_count', 'mep_count', 'mpg_count', 'de_total'];
+      ids.forEach(id => document.getElementById(id).value = '');
+      
+      // Clear the display table
+      document.getElementById('display_mac').textContent = '0';
+      document.getElementById('display_mea').textContent = '0';
+      document.getElementById('display_mei').textContent = '0';
+      document.getElementById('display_mep').textContent = '0';
+      document.getElementById('display_mpg').textContent = '0';
+      document.getElementById('display_total').textContent = '0';
+      
+      calculateDETotal();
+    }
+    // Initialize total on page load
+    window.addEventListener('DOMContentLoaded', calculateDETotal);
+  </script>
+
+</body>
+</html>
