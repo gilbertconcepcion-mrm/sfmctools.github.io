@@ -107,6 +107,8 @@ function resetAllSettings() {
     document.getElementById('sendlistDE').value = '';
     if(campaign === "genre"){
         document.getElementById('sendlistDE').parentElement.style.display = "none";
+    }else{
+        document.getElementById('sendlistDE').parentElement.style.display = "block";
     }
     //Reset Split
     if(campaign !== "transactional"){

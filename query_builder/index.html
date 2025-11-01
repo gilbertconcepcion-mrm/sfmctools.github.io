@@ -33,7 +33,7 @@ body {
     background: white;
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    overflow: hidden;
+    overflow: auto;
 }
 
 /* Header Section */
@@ -891,25 +891,6 @@ select:disabled {
                     <!-- Query Configuration Section -->
                     <div class="dashboard-section" id="queryConfig">
                         <div class="section-title">Query Configuration</div>
-                        
-                        <div class="control-group">
-                            <div class="control-label">Query Split</div>
-                            <select id="split">
-                                <option value="1">1 (Single Query)</option>
-                                <option value="2">2 (Split to 2 Parts)</option>
-                                <option value="3">3 (Split to 3 Parts)</option>
-                            </select>
-                        </div>
-                        <div class="dev-data-inputs" id="devDataInputs">
-                            <div class="dev-data-input">
-                                <div class="control-label">DEV Reference 1</div>
-                                <input type="text" id="devData1" placeholder="e.g., DEV_20251027_MPG_ADH_MOVIE_TITLE">
-                            </div>
-                            <div class="dev-data-input">
-                                <div class="control-label">DEV Reference 2</div>
-                                <input type="text" id="devData2" placeholder="e.g., DEV_20251027_MPG_ADH_MOVIE_TITLE_2">
-                            </div>
-                        </div>
 <!--
                          <div class="dev-data-input" style="padding: 10px 0px 0px 0px;">
                             <div class="control-label">SEGMENT REFERENCE</div>
@@ -920,21 +901,39 @@ select:disabled {
                             <div class="control-label">Additional Fields</div>
                             <input type="text" id="additonalField" placeholder="e.g., s.[NAME]">
                         </div>
-                        <div class="dev-data-input" style="padding: 10px 0px 0px 0px;">
-                            <div class="control-label">SENDLIST DE</div>
+                        <div class="dev-data-input" style="padding: 10px 0px 0px 0px; color">
+                            <div class="control-label" style="color:blue; font-weight: bold; font-size: 14px;">SENDLIST Data Extension</div>
                             <input type="text" id="sendlistDE" placeholder="e.g., 20251011_MOVIE_Sendlist">
                         </div>
                         <div id="transactionalField">
-                        <div class="dev-data-input" style="padding: 10px 0px 0px 0px;">
-                            <div class="control-label">Sendlist Data Field</div>
+                        <div class="dev-data-input" style="padding: 10px 0px 0px 20px;">
+                            <div class="control-label" >Sendlist Data Field</div>
                             <input type="text" id="sendlistDataField" placeholder="e.g., EmailAddress">
                         </div>
                         <div class="transactional-fields">                        
-                            <div class="dev-data-input" style="padding: 10px 0px 0px 0px;">
+                            <div class="dev-data-input" style="padding: 10px 0px 0px 20px;">
                                 <div class="control-label">Join Field Subscribers</div>
                                 <input type="text" id="joinFieldSubscriber" placeholder="e.g., EmailAddress">
                             </div>
                         </div>
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">Query Split</div>
+                            <select id="split">
+                                <option value="1">1 (Single Query)</option>
+                                <option value="2">2 (Split to 2 Parts)</option>
+                                <option value="3">3 (Split to 3 Parts)</option>
+                            </select>
+                        </div>
+                        <div class="dev-data-inputs" id="devDataInputs" style="margin-top: -6px;">
+                            <div class="dev-data-input" style="padding: 0px 0px 0px 20px;">
+                                <div class="control-label">DEV Reference 1</div>
+                                <input type="text" id="devData1" placeholder="e.g., DEV_20251027_MPG_ADH_MOVIE_TITLE" style="font-size: 10px;">
+                            </div>
+                            <div class="dev-data-input" style="padding: 0px 0px 0px 20px;">
+                                <div class="control-label" >DEV Reference 2</div>
+                                <input type="text" id="devData2" placeholder="e.g., DEV_20251027_MPG_ADH_MOVIE_TITLE_2" style="font-size: 10px;">
+                            </div>
                         </div>
                     </div>
                     
